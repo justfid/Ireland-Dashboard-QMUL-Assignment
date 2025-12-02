@@ -1,14 +1,18 @@
 import folium
 import json
+import streamlit as st
 from streamlit.components.v1 import html
 
-def render_ireland_map(ireland_path: str, ni_path: str, height:int=600):
+@st.cache_data
+def render_ireland_map(ireland_path: str, ni_path: str, height: int = 400) -> str:
     """
     Renders an OpenStreetMap map with:
     - Republic of Ireland highlighted green (as ONE layer)
     - Northern Ireland highlighted blue
+
+    Returns:
+        str: HTML representation of the map to be embedded with `html(...)`.
     """
-#TODO Add type hints here and work out what is returned
 
     #creates base map
     open_street_map = folium.Map(
@@ -51,5 +55,5 @@ def render_ireland_map(ireland_path: str, ni_path: str, height:int=600):
     #layer control
     folium.LayerControl().add_to(open_street_map)
 
-    #return HTML iframe
-    return html(open_street_map._repr_html_(), height=height)
+    #return HTML string for the map (cache-friendly)
+    return open_street_map._repr_html_()

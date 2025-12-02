@@ -12,3 +12,6 @@ gdf_4326.to_file("data/geojson/ireland_wgs84.geojson", driver="GeoJSON")
 
 #NOTE this script only has to be run once
 print("Converted → ireland_wgs84.geojson")
+
+
+#TODO move to utils maybe or data?

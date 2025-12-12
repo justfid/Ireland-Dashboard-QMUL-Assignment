@@ -3,7 +3,8 @@ from streamlit.components.v1 import html
 from utils.maps import render_ireland_map
 import pandas as pd
 
-st.set_page_config(page_title="Ireland Dashboard", page_icon="🇮🇪")
+#st.set_page_config(page_title="ROI + NI Dashboard", page_icon="🇮🇪", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="ROI + NI Dashboard", page_icon="🇮🇪", initial_sidebar_state="expanded")
 
 st.title("Republic Of Ireland + Northern Ireland Dashboard:")
 st.subheader("One Island, Two Nations")

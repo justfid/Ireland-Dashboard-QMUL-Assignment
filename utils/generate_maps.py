@@ -8,6 +8,8 @@ def render_ireland_map(ireland_path: str, ni_path: str, county_view: bool) -> st
     Renders an OpenStreetMap map with:
     - Republic of Ireland highlighted green (as ONE layer)
     - Northern Ireland highlighted blue
+    - Tooltips which show county names when county_view=True,
+      or static nation labels when county_view=False.
 
     Returns:
         str: HTML representation of the map to be embedded with `html(...)`.
@@ -27,6 +29,21 @@ def render_ireland_map(ireland_path: str, ni_path: str, county_view: bool) -> st
     with open(ni_path, "r") as file:
         ni_geo = json.load(file)
 
+    #tooltip config: county -> show feature 'name'; nation -> static label
+    if county_view:
+        roi_tooltip = folium.features.GeoJsonTooltip(
+            fields=["name"], aliases=["County:"], localize=True, sticky=True, labels=True,
+            style=("background-color: white; color: #222; border: 1px solid #ccc;")
+        )
+        ni_tooltip = folium.features.GeoJsonTooltip(
+            fields=["CountyName"], aliases=["County:"], localize=True, sticky=True, labels=True,
+            style=("background-color: white; color: #222; border: 1px solid #ccc;")
+        )
+    else:
+        #static tooltips for nation view
+        roi_tooltip = folium.Tooltip("Republic of Ireland")
+        ni_tooltip = folium.Tooltip("Northern Ireland")
+
     #ROI
     folium.GeoJson(
         ireland_geo,            
@@ -37,6 +54,8 @@ def render_ireland_map(ireland_path: str, ni_path: str, county_view: bool) -> st
             "weight": 1,
             "fillOpacity": 0.25,
         },
+        highlight_function=lambda feat: {"weight": 3, "color": "#000000", "fillOpacity": 0.35},
+        tooltip=roi_tooltip
     ).add_to(open_street_map)
 
     #NI
@@ -49,6 +68,8 @@ def render_ireland_map(ireland_path: str, ni_path: str, county_view: bool) -> st
             "weight": 2,
             "fillOpacity": 0.30,
         },
+        highlight_function=lambda feat: {"weight": 3, "color": "#000000", "fillOpacity": 0.45},
+        tooltip=ni_tooltip
     ).add_to(open_street_map)
 
     #layer control

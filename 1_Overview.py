@@ -1,10 +1,9 @@
 import streamlit as st
 from streamlit.components.v1 import html
-from utils.maps import render_ireland_map
+from utils.generate_maps import render_ireland_map
 import pandas as pd
 
-#st.set_page_config(page_title="ROI + NI Dashboard", page_icon="🇮🇪", layout="wide", initial_sidebar_state="expanded")
-st.set_page_config(page_title="ROI + NI Dashboard", page_icon="🇮🇪", initial_sidebar_state="expanded")
+st.set_page_config(page_title="ROI + NI Dashboard", page_icon="🇮🇪", layout = "centered", initial_sidebar_state="expanded")
 
 st.title("Republic Of Ireland + Northern Ireland Dashboard:")
 st.subheader("One Island, Two Nations")
@@ -34,7 +33,7 @@ intro_text = pd.DataFrame(
         "7,052,314",
         "$630.305",
         "32",
-        "EUR + GBP",
+        "EUR + GBP (€+£)",
     ],
     },
     index = ["Overview", "Population (Most Recent Census)", "GDP in Billions (2023)", "Number of Counties", "Currency"]
@@ -42,24 +41,40 @@ intro_text = pd.DataFrame(
 
 st.table(intro_text)
 st.caption("Most recent census used for population for each nation")
-st.caption("USD rate based on 2023 average given by The Federal Reserve Bank of St Louis")
+st.caption("""USD rate based on 2023 average from The Federal Reserve Bank of St Louis:  
+    GBP-USD: 1.2440  
+    EUR-USD: 1.0817""")
 
-usd_rates = pd.DataFrame({
-    "Pair": ["USD - GBP", "USD - EUR"],
-    "2023 Average Rate": [1.2440, 1.0817],
-})
-st.dataframe(usd_rates, hide_index=True)
+# ensure a persistent view state
+if "view" not in st.session_state:
+    st.session_state.view = "nation"  # default view
 
+left, middle, right = st.columns(3)
+left.subheader("Map")
 
-st.subheader("Map")
-map = html(render_ireland_map("data/cleaned/geojson/ireland_wgs84.geojson",
-    "data/raw/geojson/northern_ireland.geojson"), height=400)
+right.write(f"**Current view:** {st.session_state.view.title()}")
+if right.button("Toggle county / nation view"):
+    st.session_state.view = "county" if st.session_state.view == "nation" else "nation"
+
+# pick paths based on state
+if st.session_state.view == "county":
+    ireland_path = "data/raw/geojson/ie_county.json"
+    ni_path = "data/raw/geojson/ni_county.geojson"
+    county_view = True
+else:
+    ireland_path = "data/raw/geojson/ie.json"
+    ni_path = "data/raw/geojson/northern_ireland.geojson"
+    county_view = False
+
+OSM_map = html(render_ireland_map(ireland_path, ni_path, county_view), height=400)
+
+left, middle, right = st.columns(3)
+
+left.caption("**Key:**")
 
 map_key = pd.DataFrame({
     "Nation": ["ROI", "NI"],
     "Colour": ["Green", "Blue"]
 })
-#Add toggle for counties
 
-st.caption("Key:")
-st.dataframe(map_key, hide_index=True)
+left.dataframe(map_key, hide_index=True)

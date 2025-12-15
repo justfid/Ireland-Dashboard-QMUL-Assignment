@@ -3,8 +3,7 @@ import json
 import streamlit as st
 from streamlit.components.v1 import html
 
-@st.cache_data
-def render_ireland_map(ireland_path: str, ni_path: str, height: int = 400) -> str:
+def render_ireland_map(ireland_path: str, ni_path: str, county_view: bool) -> str:
     """
     Renders an OpenStreetMap map with:
     - Republic of Ireland highlighted green (as ONE layer)
@@ -22,11 +21,11 @@ def render_ireland_map(ireland_path: str, ni_path: str, height: int = 400) -> st
     )
 
     #loads ROI + NI GeoJSON
-    with open(ireland_path, "r") as f:
-        ireland_geo = json.load(f)
+    with open(ireland_path, "r") as file:
+        ireland_geo = json.load(file)
 
-    with open(ni_path, "r") as f:
-        ni_geo = json.load(f)
+    with open(ni_path, "r") as file:
+        ni_geo = json.load(file)
 
     #ROI
     folium.GeoJson(
@@ -57,3 +56,5 @@ def render_ireland_map(ireland_path: str, ni_path: str, height: int = 400) -> st
 
     #return HTML string for the map (cache-friendly)
     return open_street_map._repr_html_()
+
+

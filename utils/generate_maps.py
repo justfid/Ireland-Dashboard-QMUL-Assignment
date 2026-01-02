@@ -29,20 +29,30 @@ def render_ireland_map(ireland_path: str, ni_path: str, county_view: bool) -> st
     with open(ni_path, "r") as file:
         ni_geo = json.load(file)
 
+    #creates common "display_name"
+    [feat.setdefault("properties", {}).update(
+        {"display_name": feat["properties"].get("name", "").title()}
+    ) for feat in ireland_geo.get("features", [])]
+
+    [feat.setdefault("properties", {}).update(
+        {"display_name": feat["properties"].get("CountyName", "").title()}
+    ) for feat in ni_geo.get("features", [])]
+
     #tooltip config: county -> show feature 'name'; nation -> static label
     if county_view:
-        roi_tooltip = folium.features.GeoJsonTooltip(
-            fields=["name"], aliases=["County:"], localize=True, sticky=True, labels=True,
+        common_tooltip = dict(
+            fields=["display_name"],
+            aliases=["County:"],
+            localize=True,
+            sticky=True,
+            labels=True,
             style=("background-color: white; color: #222; border: 1px solid #ccc;")
         )
-        ni_tooltip = folium.features.GeoJsonTooltip(
-            fields=["CountyName"], aliases=["County:"], localize=True, sticky=True, labels=True,
-            style=("background-color: white; color: #222; border: 1px solid #ccc;")
-        )
+        roi_tooltip = folium.features.GeoJsonTooltip(**common_tooltip)
+        ni_tooltip  = folium.features.GeoJsonTooltip(**common_tooltip)
     else:
-        #static tooltips for nation view
         roi_tooltip = folium.Tooltip("Republic of Ireland")
-        ni_tooltip = folium.Tooltip("Northern Ireland")
+        ni_tooltip  = folium.Tooltip("Northern Ireland")
 
     #ROI
     folium.GeoJson(

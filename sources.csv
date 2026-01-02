@@ -1,6 +1,6 @@
-Topic,Source,Accessed,URL
-NI GDP 2023,ONS - Regional economic activity (GDP) 1998-2023,2025-12-12,"https://www.ons.gov.uk/economy/grossdomesticproductgdp/bulletins/regionaleconomicactivitybygrossdomesticproductuk/1998to2023"
-ROI GDP 2023,CSO - Annual National Accounts 2023 (GDP & growth rates),2025-12-12,"https://www.cso.ie/en/releasesandpublications/ep/p-ana/annualnationalaccounts2023/gdpandgrowthrates/"
-2023 Average USD Exchange Rate,FRED - USD conversion series (AEXUSEU+AEXUSUK),2025-12-12,"https://fred.stlouisfed.org/graph/?id=AEXUSEU,AEXUSUK"
-GeoJSON ROI,simplemaps - Ireland admin1 GeoJSON, 2025-12-12,"https://simplemaps.com/gis/country/ie#admin1"
-GeoJSON NI,OSNI - 50K Boundaries - NI Counties (data.gov.uk),2025-12-12,"https://www.data.gov.uk/dataset/db209d57-bee0-4ecc-bb8f-5915130c2505/osni-open-data-50k-boundaries-ni-counties6"
+Page,Topic,Source,Accessed,URL
+Overview,NI GDP 2023,ONS - Regional economic activity (GDP) 1998-2023,2025-12-12,"https://www.ons.gov.uk/economy/grossdomesticproductgdp/bulletins/regionaleconomicactivitybygrossdomesticproductuk/1998to2023"
+Overview,ROI GDP 2023,CSO - Annual National Accounts 2023 (GDP & growth rates),2025-12-12,"https://www.cso.ie/en/releasesandpublications/ep/p-ana/annualnationalaccounts2023/gdpandgrowthrates/"
+Overview,2023 Average USD Exchange Rate,FRED - USD conversion series (AEXUSEU+AEXUSUK),2025-12-12,"https://fred.stlouisfed.org/graph/?id=AEXUSEU,AEXUSUK"
+Overview,GeoJSON ROI,simplemaps - Ireland admin1 GeoJSON, 2025-12-12,"https://simplemaps.com/gis/country/ie#admin1"
+Overview,GeoJSON NI,OSNI - 50K Boundaries - NI Counties (data.gov.uk),2025-12-12,"https://www.data.gov.uk/dataset/db209d57-bee0-4ecc-bb8f-5915130c2505/osni-open-data-50k-boundaries-ni-counties6"

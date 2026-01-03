@@ -4,3 +4,6 @@ Overview,ROI GDP 2023,CSO - Annual National Accounts 2023 (GDP & growth rates),2
 Overview,2023 Average USD Exchange Rate,FRED - USD conversion series (AEXUSEU+AEXUSUK),2025-12-12,"https://fred.stlouisfed.org/graph/?id=AEXUSEU,AEXUSUK"
 Overview,GeoJSON ROI,simplemaps - Ireland admin1 GeoJSON, 2025-12-12,"https://simplemaps.com/gis/country/ie#admin1"
 Overview,GeoJSON NI,OSNI - 50K Boundaries - NI Counties (data.gov.uk),2025-12-12,"https://www.data.gov.uk/dataset/db209d57-bee0-4ecc-bb8f-5915130c2505/osni-open-data-50k-boundaries-ni-counties6"
+Demographics,Population (ROI & NI),CSO - Ireland and Northern Ireland Joint Census Publication (CPNI01),2026-01-03,"https://data.cso.ie/table/CPNI01"
+Demographics,Population distribution by age and sex (ROI & NI),CSO - Ireland and Northern Ireland Joint Census Publication (CPNI02),2026-01-03,"https://data.cso.ie/table/CPNI02"
+Demographics,Median age over time (ROI & NI),CSO - Ireland and Northern Ireland Joint Census Publication (CPNI03),2026-01-03,"https://data.cso.ie/table/CPNI03"

@@ -1,0 +1,163 @@
+Year,Region,Sex,Age band,Population
+2022,All-Island,Both sexes,0-4,407347
+2022,All-Island,Both sexes,5-9,466328
+2022,All-Island,Both sexes,10-14,503491
+2022,All-Island,Both sexes,15-19,453792
+2022,All-Island,Both sexes,20-24,412547
+2022,All-Island,Both sexes,25-29,411038
+2022,All-Island,Both sexes,30-34,457012
+2022,All-Island,Both sexes,35-39,511695
+2022,All-Island,Both sexes,40-44,536655
+2022,All-Island,Both sexes,45-49,491932
+2022,All-Island,Both sexes,50-54,469206
+2022,All-Island,Both sexes,55-59,437549
+2022,All-Island,Both sexes,60-64,389326
+2022,All-Island,Both sexes,65-69,334655
+2022,All-Island,Both sexes,70-74,285637
+2022,All-Island,Both sexes,75-79,224300
+2022,All-Island,Both sexes,80-84,141648
+2022,All-Island,Both sexes,85+,125524
+2022,All-Island,Female,0-4,198572
+2022,All-Island,Female,5-9,227534
+2022,All-Island,Female,10-14,246274
+2022,All-Island,Female,15-19,221510
+2022,All-Island,Female,20-24,202402
+2022,All-Island,Female,25-29,205801
+2022,All-Island,Female,30-34,235908
+2022,All-Island,Female,35-39,266196
+2022,All-Island,Female,40-44,275666
+2022,All-Island,Female,45-49,248661
+2022,All-Island,Female,50-54,235869
+2022,All-Island,Female,55-59,221623
+2022,All-Island,Female,60-64,197926
+2022,All-Island,Female,65-69,169444
+2022,All-Island,Female,70-74,146222
+2022,All-Island,Female,75-79,118104
+2022,All-Island,Female,80-84,78332
+2022,All-Island,Female,85+,79142
+2022,All-Island,Male,0-4,208775
+2022,All-Island,Male,5-9,238794
+2022,All-Island,Male,10-14,257217
+2022,All-Island,Male,15-19,232282
+2022,All-Island,Male,20-24,210145
+2022,All-Island,Male,25-29,205237
+2022,All-Island,Male,30-34,221104
+2022,All-Island,Male,35-39,245499
+2022,All-Island,Male,40-44,260989
+2022,All-Island,Male,45-49,243271
+2022,All-Island,Male,50-54,233337
+2022,All-Island,Male,55-59,215926
+2022,All-Island,Male,60-64,191400
+2022,All-Island,Male,65-69,165211
+2022,All-Island,Male,70-74,139415
+2022,All-Island,Male,75-79,106196
+2022,All-Island,Male,80-84,63316
+2022,All-Island,Male,85+,46382
+2022,Northern Ireland,Both sexes,0-4,111932
+2022,Northern Ireland,Both sexes,5-9,123658
+2022,Northern Ireland,Both sexes,10-14,129289
+2022,Northern Ireland,Both sexes,15-19,116164
+2022,Northern Ireland,Both sexes,20-24,105404
+2022,Northern Ireland,Both sexes,25-29,115230
+2022,Northern Ireland,Both sexes,30-34,124789
+2022,Northern Ireland,Both sexes,35-39,128826
+2022,Northern Ireland,Both sexes,40-44,125131
+2022,Northern Ireland,Both sexes,45-49,118428
+2022,Northern Ireland,Both sexes,50-54,129203
+2022,Northern Ireland,Both sexes,55-59,130384
+2022,Northern Ireland,Both sexes,60-64,116656
+2022,Northern Ireland,Both sexes,65-69,96511
+2022,Northern Ireland,Both sexes,70-74,82753
+2022,Northern Ireland,Both sexes,75-79,70040
+2022,Northern Ireland,Both sexes,80-84,45062
+2022,Northern Ireland,Both sexes,85+,41083
+2022,Northern Ireland,Female,0-4,54565
+2022,Northern Ireland,Female,5-9,60334
+2022,Northern Ireland,Female,10-14,63186
+2022,Northern Ireland,Female,15-19,56224
+2022,Northern Ireland,Female,20-24,50705
+2022,Northern Ireland,Female,25-29,57391
+2022,Northern Ireland,Female,30-34,64202
+2022,Northern Ireland,Female,35-39,66539
+2022,Northern Ireland,Female,40-44,64703
+2022,Northern Ireland,Female,45-49,60331
+2022,Northern Ireland,Female,50-54,65859
+2022,Northern Ireland,Female,55-59,66357
+2022,Northern Ireland,Female,60-64,59687
+2022,Northern Ireland,Female,65-69,48682
+2022,Northern Ireland,Female,70-74,42619
+2022,Northern Ireland,Female,75-79,37570
+2022,Northern Ireland,Female,80-84,25334
+2022,Northern Ireland,Female,85+,26308
+2022,Northern Ireland,Male,0-4,57367
+2022,Northern Ireland,Male,5-9,63324
+2022,Northern Ireland,Male,10-14,66103
+2022,Northern Ireland,Male,15-19,59940
+2022,Northern Ireland,Male,20-24,54699
+2022,Northern Ireland,Male,25-29,57839
+2022,Northern Ireland,Male,30-34,60587
+2022,Northern Ireland,Male,35-39,62287
+2022,Northern Ireland,Male,40-44,60428
+2022,Northern Ireland,Male,45-49,58097
+2022,Northern Ireland,Male,50-54,63344
+2022,Northern Ireland,Male,55-59,64027
+2022,Northern Ireland,Male,60-64,56969
+2022,Northern Ireland,Male,65-69,47829
+2022,Northern Ireland,Male,70-74,40134
+2022,Northern Ireland,Male,75-79,32470
+2022,Northern Ireland,Male,80-84,19728
+2022,Northern Ireland,Male,85+,14775
+2022,Republic of Ireland,Both sexes,0-4,295415
+2022,Republic of Ireland,Both sexes,5-9,342670
+2022,Republic of Ireland,Both sexes,10-14,374202
+2022,Republic of Ireland,Both sexes,15-19,337628
+2022,Republic of Ireland,Both sexes,20-24,307143
+2022,Republic of Ireland,Both sexes,25-29,295808
+2022,Republic of Ireland,Both sexes,30-34,332223
+2022,Republic of Ireland,Both sexes,35-39,382869
+2022,Republic of Ireland,Both sexes,40-44,411524
+2022,Republic of Ireland,Both sexes,45-49,373504
+2022,Republic of Ireland,Both sexes,50-54,340003
+2022,Republic of Ireland,Both sexes,55-59,307165
+2022,Republic of Ireland,Both sexes,60-64,272670
+2022,Republic of Ireland,Both sexes,65-69,238144
+2022,Republic of Ireland,Both sexes,70-74,202884
+2022,Republic of Ireland,Both sexes,75-79,154260
+2022,Republic of Ireland,Both sexes,80-84,96586
+2022,Republic of Ireland,Both sexes,85+,84441
+2022,Republic of Ireland,Female,0-4,144007
+2022,Republic of Ireland,Female,5-9,167200
+2022,Republic of Ireland,Female,10-14,183088
+2022,Republic of Ireland,Female,15-19,165286
+2022,Republic of Ireland,Female,20-24,151697
+2022,Republic of Ireland,Female,25-29,148410
+2022,Republic of Ireland,Female,30-34,171706
+2022,Republic of Ireland,Female,35-39,199657
+2022,Republic of Ireland,Female,40-44,210963
+2022,Republic of Ireland,Female,45-49,188330
+2022,Republic of Ireland,Female,50-54,170010
+2022,Republic of Ireland,Female,55-59,155266
+2022,Republic of Ireland,Female,60-64,138239
+2022,Republic of Ireland,Female,65-69,120762
+2022,Republic of Ireland,Female,70-74,103603
+2022,Republic of Ireland,Female,75-79,80534
+2022,Republic of Ireland,Female,80-84,52998
+2022,Republic of Ireland,Female,85+,52834
+2022,Republic of Ireland,Male,0-4,151408
+2022,Republic of Ireland,Male,5-9,175470
+2022,Republic of Ireland,Male,10-14,191114
+2022,Republic of Ireland,Male,15-19,172342
+2022,Republic of Ireland,Male,20-24,155446
+2022,Republic of Ireland,Male,25-29,147398
+2022,Republic of Ireland,Male,30-34,160517
+2022,Republic of Ireland,Male,35-39,183212
+2022,Republic of Ireland,Male,40-44,200561
+2022,Republic of Ireland,Male,45-49,185174
+2022,Republic of Ireland,Male,50-54,169993
+2022,Republic of Ireland,Male,55-59,151899
+2022,Republic of Ireland,Male,60-64,134431
+2022,Republic of Ireland,Male,65-69,117382
+2022,Republic of Ireland,Male,70-74,99281
+2022,Republic of Ireland,Male,75-79,73726
+2022,Republic of Ireland,Male,80-84,43588
+2022,Republic of Ireland,Male,85+,31607

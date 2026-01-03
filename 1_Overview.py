@@ -2,6 +2,7 @@ import streamlit as st
 from streamlit.components.v1 import html
 import pandas as pd
 from utils.generate_maps import render_ireland_map
+from typing import Tuple
 
 # Constants / data
 USD_RATES_2023 = {
@@ -98,42 +99,71 @@ def render_map_html(view: str) -> str:
     return render_ireland_map(ireland_path, ni_path, county_view)
 
 
-def render_header():
+def render_header() -> None:
     st.title("🇮🇪 Republic of Ireland + Northern Ireland Dashboard")
-    st.subheader("One island, two nations")
+    st.subheader("One island, two jurisdictions")
+
     st.write(
-        "This dashboard compares ROI and NI across key themes (demographics, economy, health, and identity) "
-        "to highlight similarities, differences, and trends over time."
+        "This dashboard is a comparative investigation of the island of Ireland, using official statistics and "
+        "API-derived indicators to examine key social, economic, demographic, and environmental challenges. "
+        "It is designed to support exploration of differences, similarities, and trends over time."
     )
-    st.markdown(
-        """
-**Planned sections**
-- Overview & geography (this page)
-- Demographics (population pyramids, age dependency, change over time, religion & NI identity split)
-- Economy (GDP, wages, cost-of-living indicators)
-- Society (health, education, housing indicators)
-"""
+
+    st.caption(
+        "Use the sidebar to navigate themes. Where definitions differ between ROI and NI, charts include notes on comparability."
     )
 
 
-def render_overview_controls():
+def render_overview_controls() -> Tuple[str, str]:
     c1, c2 = st.columns([1, 1])
+
     with c1:
-        focus = st.selectbox("Focus", ["All-Island", "Republic of Ireland (ROI)", "Northern Ireland (NI)"])
+        focus: str = st.selectbox(
+            "Focus",
+            ["All-Island", "Republic of Ireland (ROI)", "Northern Ireland (NI)"],
+            key="focus_select",
+        )
+
+    disable_native: bool = (focus == "All-Island")
+
+    # ✅ IMPORTANT: set/repair session state BEFORE creating the radio widget
+    if "gdp_mode_radio" not in st.session_state:
+        st.session_state["gdp_mode_radio"] = "USD (comparable)"
+
+    if disable_native and st.session_state["gdp_mode_radio"] == "Native currency":
+        st.session_state["gdp_mode_radio"] = "USD (comparable)"
+
     with c2:
-        gdp_mode = st.radio("GDP display", ["USD (comparable)", "Native currency"], horizontal=True)
+        gdp_mode: str = st.radio(
+            "GDP display",
+            ["USD (comparable)", "Native currency"],
+            horizontal=True,
+            key="gdp_mode_radio",
+            disabled=disable_native,
+        )
+
+        if disable_native:
+            st.caption("Native currency is disabled for All-Island because it combines EUR and GBP.")
+
     return focus, gdp_mode
 
 
-def render_kpis(focus: str, gdp_mode: str):
-    key = "ALL" if "All-Island" in focus else ("ROI" if "ROI" in focus else "NI")
-    data = NATIONS[key]
+def render_kpis(focus: str, gdp_mode: str) -> None:
+    key: str = (
+        "ALL" if focus == "All-Island"
+        else "ROI" if "ROI" in focus
+        else "NI"
+    )
+    data: dict = NATIONS[key]
 
+    pop_value: str
+    pop_date: str
     pop_value, pop_date = data["population"]
 
+    # GDP display logic
     if gdp_mode == "Native currency" and data["gdp_native_b"] is not None:
-        gdp_value = f'{data["gdp_native_b"]:.3f}B'
-        gdp_delta = data["native_currency"]
+        gdp_value: str = f'{data["gdp_native_b"]:.3f}B'
+        gdp_delta: str = data["native_currency"]
     else:
         gdp_value = f'{data["gdp_usd_b"]:.3f}B'
         gdp_delta = "USD (2023)"
@@ -163,17 +193,17 @@ def render_map_panel():
             "Switch to nation view" if st.session_state.view == "county" else "Switch to county view",
             key="toggle_view",
             on_click=_toggle_view,
-            use_container_width=True,
+            width='stretch',
         )
 
         st.markdown("**Key**")
         map_key = pd.DataFrame(
             {"Nation": ["ROI", "NI"], "Colour": ["Green", "Blue"]}
         )
-        st.dataframe(map_key, hide_index=True, use_container_width=True)
+        st.dataframe(map_key, hide_index=True, width='stretch')
 
 
-def render_sources_and_notes():
+def render_sources_and_notes() -> None:
     with st.expander("Data sources, provenance & assumptions (for marking)"):
         st.markdown(
             f"""
@@ -182,14 +212,8 @@ def render_sources_and_notes():
   - GBP→USD: {USD_RATES_2023["GBPUSD"]}
   - EUR→USD: {USD_RATES_2023["EURUSD"]}
 - **Map boundaries:** GeoJSON files stored locally in `data/raw/geojson/`.
-- **Cleaning (applies across dashboard):** place names normalised to consistent casing and naming conventions
-  (e.g. `Derry/Londonderry` in NI pages).
 """
         )
-    st.caption(
-        "A dashboard implies interactivity and ideally up-to-date data; this project focuses on interactive exploration "
-        "and reproducible methods."  #aligns with brief language
-    )
 
 
 def main() -> None:

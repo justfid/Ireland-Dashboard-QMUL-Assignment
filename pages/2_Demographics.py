@@ -8,6 +8,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
+pyramid_year = 2022
 
 #page config
 st.set_page_config(
@@ -196,17 +197,6 @@ with st.sidebar:
     available_years = sorted(
         pop_dist.loc[pop_dist["Region"] == pyramid_region, "Year"].unique()
     )
-    if available_years:
-        pyramid_year = int(
-            st.selectbox(
-                "Census year",
-                available_years,
-                index=len(available_years) - 1,
-            )
-        )
-    else:
-        pyramid_year = year_max
-
 
 #page stuff
 st.title("👥 Demographics")

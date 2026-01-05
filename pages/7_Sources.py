@@ -15,8 +15,7 @@ st.write(
 )
 
 
-# Load sources
-
+#load sources
 sources_df = pd.read_csv("sources.csv")
 sources_df.columns = [c.strip().title() for c in sources_df.columns]
 
@@ -28,9 +27,24 @@ if missing:
     st.stop()
 
 
-# Grouped display
+#page order (matches sidebar)
+page_order = [
+    "Overview",
+    "Demographics",
+    "Economy",
+    "Society",
+    "Environment",
+    "Capital Cities",
+    "Sources",
+]
 
-for page in sorted(sources_df["Page"].unique()):
+pages_in_data = list(sources_df["Page"].dropna().unique())
+ordered_pages = [p for p in page_order if p in pages_in_data]
+ordered_pages += [p for p in pages_in_data if p not in page_order]
+
+
+#grouped display
+for page in ordered_pages:
     st.divider()
     st.header(page)
 
@@ -53,8 +67,7 @@ for page in sorted(sources_df["Page"].unique()):
                     st.link_button("Open source", row["Url"])
 
 
-# Raw table 
-
+#raw table
 st.divider()
 with st.expander("View full sources table (raw CSV)"):
     st.dataframe(

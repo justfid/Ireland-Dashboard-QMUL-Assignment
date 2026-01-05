@@ -9,7 +9,6 @@ import plotly.graph_objects as go
 import streamlit as st
 
 
-
 #page config
 st.set_page_config(
     page_title="Demographics",
@@ -23,6 +22,7 @@ CLEAN_DIR = Path("data/cleaned/demographics")
 POP_TIME_PATH = CLEAN_DIR / "population_over_time.csv"
 POP_DIST_PATH = CLEAN_DIR / "population_distribution.csv"
 MEDIAN_AGE_PATH = CLEAN_DIR / "median_age_over_time.csv"
+DEP_RATIO_PATH = CLEAN_DIR / "dependency_ratio_over_time.csv"
 
 ROI = "Republic of Ireland"
 NI = "Northern Ireland"
@@ -81,7 +81,20 @@ def load_median_age(path: Path) -> pd.DataFrame:
     return df.sort_values(["Region", "Year"]).reset_index(drop=True)
 
 
-#helpers functions
+@st.cache_data(show_spinner=False)
+def load_dependency_ratio(path: Path) -> pd.DataFrame:
+    df = pd.read_csv(path)
+    _ensure_cols(df, ["Year", "Region", "Dependency ratio"])
+
+    df["Year"] = pd.to_numeric(df["Year"], errors="coerce").astype(int)
+    df["Dependency ratio"] = pd.to_numeric(df["Dependency ratio"], errors="coerce")
+    df["Region"] = df["Region"].astype(str).str.strip()
+
+    df = df[df["Region"].isin(REGIONS)]
+    return df.sort_values(["Region", "Year"]).reset_index(drop=True)
+
+
+#helper functions
 def filter_years(df: pd.DataFrame, year_range: Tuple[int, int]) -> pd.DataFrame:
     return df[(df["Year"] >= year_range[0]) & (df["Year"] <= year_range[1])]
 
@@ -138,6 +151,7 @@ def make_population_pyramid(
         color="Sex",
         orientation="h",
         title=f"Population pyramid — {region} ({year})",
+        labels={"Value": "Population (mirrored)", "Age band": "Age band"},
     )
     fig.update_xaxes(tickformat="~s")
     fig.update_layout(height=520)
@@ -148,6 +162,8 @@ def make_population_pyramid(
 pop_time = load_population_over_time(POP_TIME_PATH)
 pop_dist = load_population_distribution(POP_DIST_PATH)
 median_age = load_median_age(MEDIAN_AGE_PATH)
+dep_ratio = load_dependency_ratio(DEP_RATIO_PATH)
+
 
 #sidebar stuff
 with st.sidebar:
@@ -180,20 +196,28 @@ with st.sidebar:
     available_years = sorted(
         pop_dist.loc[pop_dist["Region"] == pyramid_region, "Year"].unique()
     )
-    pyramid_year = int(available_years[-1])
+    if available_years:
+        pyramid_year = int(
+            st.selectbox(
+                "Census year",
+                available_years,
+                index=len(available_years) - 1,
+            )
+        )
+    else:
+        pyramid_year = year_max
 
 
 #page stuff
 st.title("👥 Demographics")
-
 st.caption(
     "All charts use census observations only. Growth and trends are measured between consecutive censuses."
 )
-
 st.divider()
 
+
 #snapshot
-st.subheader("Snapshot (latest census year)")
+st.header("Population")
 latest_year = year_range[1]
 snap = filter_years(pop_time, year_range)
 snap = snap[(snap["Year"] == latest_year) & (snap["Region"].isin(regions_trend))]
@@ -203,12 +227,14 @@ for col, region in zip(cols, REGIONS):
     if region in regions_trend:
         v = snap.loc[snap["Region"] == region, "Population"]
         if not v.empty:
-            col.metric(region, f"{int(v.iloc[0]):,}", f"Census {latest_year}")
+            col.metric(f"Population — {region}", f"{int(v.iloc[0]):,}")
+            col.caption(f"Census {latest_year}")
 
 st.divider()
 
+
 #population over time
-st.header("Population over time (census years)")
+st.subheader("Population over time (census years)")
 pop_f = filter_years(pop_time, year_range)
 pop_f = pop_f[pop_f["Region"].isin(regions_trend)]
 
@@ -218,9 +244,10 @@ fig = px.line(
     y="Population",
     color="Region",
     markers=True,
+    category_orders={"Region": REGIONS},
 )
 fig.update_yaxes(tickformat="~s")
-st.plotly_chart(fig, width="stretch")
+st.plotly_chart(fig, use_container_width=True)
 
 growth = make_growth_between_census(pop_f)
 metric_mode = st.radio(
@@ -236,49 +263,77 @@ fig_g = px.bar(
     y=y_col,
     color="Region",
     barmode="group",
+    category_orders={"Region": REGIONS},
 )
-st.plotly_chart(fig_g, width="stretch")
+st.plotly_chart(fig_g, use_container_width=True)
+
+st.caption(
+    "Note: growth is measured between consecutive census observations (no annual interpolation)."
+)
 
 st.divider()
+
 
 #population structure
 st.header("Population structure (age / sex)")
 fig_pyr = make_population_pyramid(
     pop_dist, pyramid_region, pyramid_year, pyramid_mode
 )
-st.plotly_chart(fig_pyr, width="stretch")
+st.plotly_chart(fig_pyr, use_container_width=True)
 
-st.info(
-    "Sex-specific population structure is shown via the pyramid only, "
-    "to avoid overloading summary trend charts."
+st.caption(
+    "Sex-specific population structure is shown via the pyramid only to avoid overloading summary trend charts."
 )
 
 st.divider()
+
+
+#median age & dependency ratio
+st.header("Population ageing indicators")
+
+col_left, col_right = st.columns(2)
 
 #median age
-st.header("Median age over time")
-ma = filter_years(median_age, year_range)
-ma = ma[ma["Region"].isin(regions_trend)]
+with col_left:
+    st.subheader("Median age over time")
 
-fig_ma = px.line(
-    ma,
-    x="Year",
-    y="Median age",
-    color="Region",
-    markers=True,
-)
-st.plotly_chart(fig_ma, width="stretch")
+    ma = filter_years(median_age, year_range)
+    ma = ma[ma["Region"].isin(regions_trend)]
 
-st.info(
-    "All-Island median age values are population-weighted estimates derived from ROI and NI. "
-    "They are not exact pooled medians."
-)
+    fig_ma = px.line(
+        ma,
+        x="Year",
+        y="Median age",
+        color="Region",
+        markers=True,
+        category_orders={"Region": REGIONS},
+    )
+    st.plotly_chart(fig_ma, use_container_width=True)
 
-st.divider()
+    st.caption(
+        "All-Island median age values are population-weighted estimates derived from ROI and NI "
+        "(not exact pooled medians)."
+    )
 
-#dependency ratio placeholder
-st.header("Dependency ratio (coming soon)")
-st.caption(
-    "A real dependency-ratio time series will be integrated once available. "
-    "No proxy or synthetic values are used."
-)
+#dependency ratio
+with col_right:
+    st.subheader("Dependency ratio over time")
+
+    dr = filter_years(dep_ratio, year_range)
+    dr = dr[dr["Region"].isin(regions_trend)]
+
+    fig_dr = px.line(
+        dr,
+        x="Year",
+        y="Dependency ratio",
+        color="Region",
+        markers=True,
+        category_orders={"Region": REGIONS},
+    )
+    st.plotly_chart(fig_dr, use_container_width=True)
+
+    st.caption(
+        "All-Island dependency ratio values are population-weighted estimates derived from ROI and NI "
+        "(not exact pooled ratios). "
+        "CPNI04 includes an early observation labelled '1936/1937', recorded here as 1936 for consistency."
+    )

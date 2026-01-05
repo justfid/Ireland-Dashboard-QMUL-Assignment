@@ -4,7 +4,7 @@ import pandas as pd
 from utils.generate_maps import render_ireland_map
 from typing import Tuple
 
-# Constants / data
+#constants / data
 USD_RATES_2023 = {
     "GBPUSD": 1.2440,
     "EURUSD": 1.0817,
@@ -14,7 +14,6 @@ NATIONS = {
     "ROI": {
         "name": "Republic of Ireland (ROI)",
         "overview": "An independent, sovereign nation",
-        "population": ("5,149,139", "April 2022"),
         "gdp_usd_b": 551.604,
         "gdp_native_b": 509.952,
         "native_currency": "EUR (€)",
@@ -24,7 +23,6 @@ NATIONS = {
     "NI": {
         "name": "Northern Ireland (NI)",
         "overview": "A constituent nation of the United Kingdom (UK)",
-        "population": ("1,903,175", "March 2021"),
         "gdp_usd_b": 78.701,
         "gdp_native_b": 63.265,
         "native_currency": "GBP (£)",
@@ -34,7 +32,6 @@ NATIONS = {
     "ALL": {
         "name": "All-Island",
         "overview": "A geographical island comprising ROI and NI",
-        "population": ("7,052,314", "Combined latest censuses"),
         "gdp_usd_b": 630.305,
         "gdp_native_b": None,  #mixed currencies
         "native_currency": "EUR + GBP (€ + £)",
@@ -50,26 +47,61 @@ def _toggle_view() -> None:
 
 
 @st.cache_data(show_spinner=False)
+def _load_latest_census_populations() -> dict:
+    #uses the authoritative cleaned demographics file (census years only)
+    path = "data/cleaned/demographics/population_over_time.csv"
+    df = pd.read_csv(path)
+
+    required = {"Year", "Region", "Population"}
+    if not required.issubset(df.columns):
+        raise ValueError(f"Expected columns {sorted(required)}, got {list(df.columns)}")
+
+    df["Year"] = pd.to_numeric(df["Year"], errors="coerce")
+    df["Population"] = pd.to_numeric(df["Population"], errors="coerce")
+    df["Region"] = df["Region"].astype(str).str.strip()
+    df = df.dropna(subset=["Year", "Population"])
+
+    region_map = {
+        "Republic of Ireland": "ROI",
+        "Northern Ireland": "NI",
+        "All-Island": "ALL",
+    }
+
+    out: dict = {}
+    for region_name, key in region_map.items():
+        sub = df[df["Region"] == region_name].sort_values("Year")
+        if sub.empty:
+            continue
+        latest = sub.iloc[-1]
+        year = int(latest["Year"])
+        pop = int(latest["Population"])
+        out[key] = (f"{pop:,}", f"Census {year}")
+
+    return out
+
+
+@st.cache_data(show_spinner=False)
 def build_intro_table() -> pd.DataFrame:
+    pop_map = _load_latest_census_populations()
     return pd.DataFrame(
         {
             "Republic of Ireland (ROI)": [
                 NATIONS["ROI"]["overview"],
-                NATIONS["ROI"]["population"][0],
+                pop_map["ROI"][0],
                 f'{NATIONS["ROI"]["gdp_usd_b"]:.3f} (USD) / {NATIONS["ROI"]["gdp_native_b"]:.3f} (EUR)',
                 str(NATIONS["ROI"]["counties"]),
                 NATIONS["ROI"]["native_currency"],
             ],
             "Northern Ireland (NI)": [
                 NATIONS["NI"]["overview"],
-                NATIONS["NI"]["population"][0],
+                pop_map["NI"][0],
                 f'{NATIONS["NI"]["gdp_usd_b"]:.3f} (USD) / {NATIONS["NI"]["gdp_native_b"]:.3f} (GBP)',
                 str(NATIONS["NI"]["counties"]),
                 NATIONS["NI"]["native_currency"],
             ],
             "All-Island": [
                 NATIONS["ALL"]["overview"],
-                NATIONS["ALL"]["population"][0],
+                pop_map["ALL"][0],
                 f'{NATIONS["ALL"]["gdp_usd_b"]:.3f} (USD)',
                 str(NATIONS["ALL"]["counties"]),
                 NATIONS["ALL"]["native_currency"],
@@ -126,7 +158,7 @@ def render_overview_controls() -> Tuple[str, str]:
 
     disable_native: bool = (focus == "All-Island")
 
-    # ✅ IMPORTANT: set/repair session state BEFORE creating the radio widget
+    #set/repair session state BEFORE creating the radio widget
     if "gdp_mode_radio" not in st.session_state:
         st.session_state["gdp_mode_radio"] = "USD (comparable)"
 
@@ -156,21 +188,24 @@ def render_kpis(focus: str, gdp_mode: str) -> None:
     )
     data: dict = NATIONS[key]
 
-    pop_value: str
-    pop_date: str
-    pop_value, pop_date = data["population"]
+    pop_map = _load_latest_census_populations()
+    pop_value, pop_date = pop_map[key]
 
-    # GDP display logic
+    #GDP display logic
     if gdp_mode == "Native currency" and data["gdp_native_b"] is not None:
         gdp_value: str = f'{data["gdp_native_b"]:.3f}B'
-        gdp_delta: str = data["native_currency"]
+        gdp_context: str = data["native_currency"]
     else:
         gdp_value = f'{data["gdp_usd_b"]:.3f}B'
-        gdp_delta = "USD (2023)"
+        gdp_context = "USD (2023)"
 
     k1, k2, k3, k4 = st.columns(4)
-    k1.metric("Population", pop_value, pop_date)
-    k2.metric("GDP", gdp_value, gdp_delta)
+    k1.metric("Population", pop_value)
+    k1.caption(pop_date)
+
+    k2.metric("GDP", gdp_value)
+    k2.caption(gdp_context)
+
     k3.metric("Counties", str(data["counties"]))
     k4.metric("Currency", data["native_currency"])
 
@@ -205,9 +240,13 @@ def render_map_panel():
 
 def render_sources_and_notes() -> None:
     with st.expander("Data sources, provenance & assumptions (for marking)"):
+        pop_map = _load_latest_census_populations()
         st.markdown(
             f"""
-- **Population:** using the most recent censuses shown on the overview table.
+- **Population:** pulled from `data/cleaned/demographics/population_over_time.csv` (authoritative cleaned census series).
+  - ROI: {pop_map["ROI"][1]}
+  - NI: {pop_map["NI"][1]}
+  - All-Island: {pop_map["ALL"][1]}
 - **GDP:** 2023 values. USD conversions use 2023 average exchange rates:
   - GBP→USD: {USD_RATES_2023["GBPUSD"]}
   - EUR→USD: {USD_RATES_2023["EURUSD"]}
@@ -233,7 +272,7 @@ def main() -> None:
     st.markdown("---")
     st.subheader("Quick comparison table")
     st.table(build_intro_table())
-    st.caption("Most recent census used for each nation’s population figure (see expander for assumptions).")
+    st.caption("Most recent census used for each nation's population figure (see expander for assumptions).")
 
     st.markdown("---")
     render_map_panel()

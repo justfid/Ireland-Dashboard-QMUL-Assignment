@@ -7,3 +7,7 @@ Overview,GeoJSON NI,OSNI - 50K Boundaries - NI Counties (data.gov.uk),2025-12-12
 Demographics,Population (ROI & NI),CSO - Ireland and Northern Ireland Joint Census Publication (CPNI01),2026-01-03,"https://data.cso.ie/table/CPNI01"
 Demographics,Population distribution by age and sex (ROI & NI),CSO - Ireland and Northern Ireland Joint Census Publication (CPNI02),2026-01-03,"https://data.cso.ie/table/CPNI02"
 Demographics,Median age over time (ROI & NI),CSO - Ireland and Northern Ireland Joint Census Publication (CPNI03),2026-01-03,"https://data.cso.ie/table/CPNI03"
+Demographics,Dependency ratio (age-based),CSO - Ireland and Northern Ireland Joint Census Publication (CPNI04),2026-01-04,"https://data.cso.ie/table/CPNI04"
+Economy,Unemployment rate (ILO),CSO - Ireland and Northern Ireland Joint Census Publication (CPNI36),2026-01-04,"https://data.cso.ie/table/CPNI36"
+Economy,Labour market snapshot (persons aged 16+),CSO / NISRA Joint Census Publication (CPNI35),2026-01-04,"https://data.cso.ie/table/CPNI35"
+Economy,Employment by industrial sector,CSO / NISRA Joint Census Publication (CPNI38),2026-01-04,"https://data.cso.ie/table/CPNI38"

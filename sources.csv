@@ -11,3 +11,8 @@ Demographics,Dependency ratio (age-based),CSO - Ireland and Northern Ireland Joi
 Economy,Unemployment rate (ILO),CSO - Ireland and Northern Ireland Joint Census Publication (CPNI36),2026-01-04,"https://data.cso.ie/table/CPNI36"
 Economy,Labour market snapshot (persons aged 16+),CSO / NISRA Joint Census Publication (CPNI35),2026-01-04,"https://data.cso.ie/table/CPNI35"
 Economy,Employment by industrial sector,CSO / NISRA Joint Census Publication (CPNI38),2026-01-04,"https://data.cso.ie/table/CPNI38"
+Economy,Cross-border commuting,CSO - Ireland and Northern Ireland Joint Census Publication (CPNI53),2026-01-06,"https://data.cso.ie/table/CPNI53"
+Economy,Mode of transport to work,CSO - Ireland and Northern Ireland Joint Census Publication (CPNI48),2026-01-06,"https://data.cso.ie/table/CPNI48"
+Living Conditions,Housing tenure,CSO / NISRA Joint Census Publication (CPNI34),2026-01-06,"https://data.cso.ie/table/CPNI34"
+Living Conditions,Housing type,CSO / NISRA Joint Census Publication (CPNI30),2026-01-07,"https://data.cso.ie/table/CPNI30"
+Living Conditions,Housing occupancy (occupied vs vacant),CSO / NISRA Joint Census Publication (CPNI32),2026-01-07,"https://data.cso.ie/table/CPNI32"

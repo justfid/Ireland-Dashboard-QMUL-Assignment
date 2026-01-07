@@ -14,6 +14,7 @@ NATIONS = {
     "ROI": {
         "name": "Republic of Ireland (ROI)",
         "overview": "An independent, sovereign nation",
+        "capital": "Dublin",
         "gdp_usd_b": 551.604,
         "gdp_native_b": 509.952,
         "native_currency": "EUR (€)",
@@ -23,6 +24,7 @@ NATIONS = {
     "NI": {
         "name": "Northern Ireland (NI)",
         "overview": "A constituent nation of the United Kingdom (UK)",
+        "capital": "Belfast",
         "gdp_usd_b": 78.701,
         "gdp_native_b": 63.265,
         "native_currency": "GBP (£)",
@@ -32,6 +34,7 @@ NATIONS = {
     "ALL": {
         "name": "All-Island",
         "overview": "A geographical island comprising ROI and NI",
+        "capital": "Dublin / Belfast",
         "gdp_usd_b": 630.305,
         "gdp_native_b": None,  #mixed currencies
         "native_currency": "EUR + GBP (€ + £)",
@@ -87,6 +90,7 @@ def build_intro_table() -> pd.DataFrame:
         {
             "Republic of Ireland (ROI)": [
                 NATIONS["ROI"]["overview"],
+                NATIONS["ROI"]["capital"],
                 pop_map["ROI"][0],
                 f'{NATIONS["ROI"]["gdp_usd_b"]:.3f} (USD) / {NATIONS["ROI"]["gdp_native_b"]:.3f} (EUR)',
                 str(NATIONS["ROI"]["counties"]),
@@ -94,6 +98,7 @@ def build_intro_table() -> pd.DataFrame:
             ],
             "Northern Ireland (NI)": [
                 NATIONS["NI"]["overview"],
+                NATIONS["NI"]["capital"],
                 pop_map["NI"][0],
                 f'{NATIONS["NI"]["gdp_usd_b"]:.3f} (USD) / {NATIONS["NI"]["gdp_native_b"]:.3f} (GBP)',
                 str(NATIONS["NI"]["counties"]),
@@ -101,6 +106,7 @@ def build_intro_table() -> pd.DataFrame:
             ],
             "All-Island": [
                 NATIONS["ALL"]["overview"],
+                NATIONS["ALL"]["capital"],
                 pop_map["ALL"][0],
                 f'{NATIONS["ALL"]["gdp_usd_b"]:.3f} (USD)',
                 str(NATIONS["ALL"]["counties"]),
@@ -109,6 +115,7 @@ def build_intro_table() -> pd.DataFrame:
         },
         index=[
             "Overview",
+            "Capital",
             "Population (Most Recent Census)",
             "GDP in Billions (2023)",
             "Number of Counties",
@@ -237,22 +244,8 @@ def render_map_panel():
         )
         st.dataframe(map_key, hide_index=True, width='stretch')
 
+        st.caption("Markers indicate capital cities")
 
-def render_sources_and_notes() -> None:
-    with st.expander("Data sources, provenance & assumptions (for marking)"):
-        pop_map = _load_latest_census_populations()
-        st.markdown(
-            f"""
-- **Population:** pulled from `data/cleaned/demographics/population_over_time.csv` (authoritative cleaned census series).
-  - ROI: {pop_map["ROI"][1]}
-  - NI: {pop_map["NI"][1]}
-  - All-Island: {pop_map["ALL"][1]}
-- **GDP:** 2023 values. USD conversions use 2023 average exchange rates:
-  - GBP→USD: {USD_RATES_2023["GBPUSD"]}
-  - EUR→USD: {USD_RATES_2023["EURUSD"]}
-- **Map boundaries:** GeoJSON files stored locally in `data/raw/geojson/`.
-"""
-        )
 
 
 def main() -> None:
@@ -278,7 +271,20 @@ def main() -> None:
     render_map_panel()
 
     st.markdown("---")
-    render_sources_and_notes()
+    
+    st.subheader("Notes")
+
+    st.markdown(
+        """
+    - Where joint census tables report different census years (e.g. 2021 for the Republic of Ireland and 2022 for Northern Ireland), 
+    the combined label **'2021/2022'** is recorded as **2022** throughout the dashboard. This is done solely for consistent ordering, 
+    filtering, and presentation, and does not imply a harmonised census year.
+
+    - GDP values shown in the Overview refer to **2023 only** and are converted to USD using average 2023 exchange rates 
+    (GBP→USD: **1.244**; EUR→USD: **1.0817**) for presentation consistency.
+    """
+    )
+
 
 
 main()

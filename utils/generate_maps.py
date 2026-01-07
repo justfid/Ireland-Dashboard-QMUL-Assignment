@@ -3,6 +3,19 @@ import json
 import streamlit as st
 from streamlit.components.v1 import html
 
+
+CAPITALS = {
+    "Dublin": {
+        "coords": [53.3498, -6.2603],
+        "colour": "green",
+    },
+    "Belfast": {
+        "coords": [54.5973, -5.9301],
+        "colour": "blue",
+    },
+}
+
+
 def render_ireland_map(ireland_path: str, ni_path: str, county_view: bool) -> str:
     """
     Renders an OpenStreetMap map with:
@@ -56,7 +69,7 @@ def render_ireland_map(ireland_path: str, ni_path: str, county_view: bool) -> st
 
     #ROI
     folium.GeoJson(
-        ireland_geo,            
+        ireland_geo,
         name="Republic of Ireland",
         style_function=lambda feat: {
             "fillColor": "#33aa33",
@@ -82,10 +95,21 @@ def render_ireland_map(ireland_path: str, ni_path: str, county_view: bool) -> st
         tooltip=ni_tooltip
     ).add_to(open_street_map)
 
+    #capital city markers (nation view only)
+    if not county_view:
+        for name, meta in CAPITALS.items():
+            folium.Marker(
+                location=meta["coords"],
+                tooltip=f"Capital city: {name}",
+                icon=folium.Icon(
+                    icon="location-dot",
+                    prefix="circle",
+                    color=meta["colour"],
+                ),
+            ).add_to(open_street_map)
+
     #layer control
     folium.LayerControl().add_to(open_street_map)
 
     #return HTML string for the map (cache-friendly)
     return open_street_map._repr_html_()
-
-

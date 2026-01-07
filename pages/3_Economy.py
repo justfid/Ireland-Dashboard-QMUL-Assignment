@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
+
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -96,10 +98,11 @@ def load_sector_employment(path: Path) -> pd.DataFrame:
 @st.cache_data(show_spinner=False)
 def load_commute_modes(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
-    _ensure_cols(df, ["Year", "Region", "Mode", "Share"])
+    _ensure_cols(df, ["Year", "Region", "Mode", "Share", "Persons"])
 
     df["Year"] = pd.to_numeric(df["Year"], errors="coerce").astype(int)
     df["Share"] = pd.to_numeric(df["Share"], errors="coerce")
+    df["Persons"] = pd.to_numeric(df["Persons"], errors="coerce")
     df["Region"] = df["Region"].astype(str).str.strip()
     df["Mode"] = df["Mode"].astype(str).str.strip()
 
@@ -134,8 +137,9 @@ def _weighted_rate(values: pd.Series, weights: pd.Series) -> float:
 #page header
 st.title("💷 Economy")
 st.write(
-    "This section compares labour-market outcomes and economic structure across the Republic of Ireland (ROI) and Northern Ireland (NI). "
-    "Indicators prioritise interpretability and cross-jurisdictional comparability."
+    "This section compares labour-market outcomes and economic structure across the Republic of Ireland (ROI), "
+    "Northern Ireland (NI), and the All-Island aggregate. Indicators prioritise interpretability and cross-jurisdictional "
+    "comparability."
 )
 st.divider()
 
@@ -160,7 +164,6 @@ with st.sidebar:
         key="labour_display_mode",
     )
 
-
 #labour market
 st.header("Labour market")
 
@@ -179,7 +182,7 @@ else:
 
         left, right = st.columns([1, 2], gap="large")
 
-        #left column: KPI-style summary (no chart)
+        #left column: KPI-style summar
         with left:
             st.subheader("Summary")
 
@@ -229,7 +232,7 @@ else:
 
             st.caption("Note: The data comes from both the 2021 and 2022 census (the most recent census from each nation)")
 
-        #right column: CPNI36 chart
+        #right column
         with right:
             st.subheader(f"ILO unemployment rate — {year}")
 
@@ -255,6 +258,7 @@ else:
 
 st.divider()
 
+
 #employment by sector
 st.header("Employment structure")
 
@@ -268,7 +272,6 @@ if SECTOR_PATH.exists():
     value_label = "Share of employment (%)" if labour_display == "Percentages" else "Persons in employment"
     text_tmpl = "%{text:.1f}%" if labour_display == "Percentages" else "%{text:,}"
 
-    #nace section letter ordering (a-u)
     sector_y["_nace"] = sector_y["Sector"].str.extract(r"\(([A-Z])\)")
     sector_y = sector_y.sort_values(["_nace", "Sector"])
 
@@ -294,71 +297,191 @@ if SECTOR_PATH.exists():
     )
     st.plotly_chart(fig_sector, use_container_width=True, config={"displayModeBar": False})
 
-    st.caption("Industries are ordered by NACE section codes (A-U) shown in brackets, matching the joint publication ordering.")
+    st.caption("Industries are ordered by NACE section codes (A–U) shown in brackets, matching the joint publication ordering.")
 else:
     st.info("Sectoral employment data not yet integrated.")
 
 st.divider()
 
+
 #commuting patterns
 st.header("Mode of transport to work")
 
 if COMMUTE_PATH.exists():
-    commute = load_commute_modes(COMMUTE_PATH)
-    commute = commute[commute["Region"].isin(regions)]
+    commute_all = load_commute_modes(COMMUTE_PATH)
+    commute_y = commute_all[commute_all["Region"].isin(regions)].copy()
 
-    years = sorted(commute["Year"].unique())
-    year_c = st.selectbox("Year (commuting)", years, index=len(years) - 1, key="commute_year")
+    metric_col = "Persons"
+    value_label = "Persons (16+) at work"
+    text_tmpl = "%{text:,.0f}"
 
-    commute_y = commute[commute["Year"] == year_c]
+    modes = sorted(commute_y["Mode"].unique())
+    if "Not stated" in modes:
+        modes.remove("Not stated")
+        modes.append("Not stated")
+
+    commute_y["Mode"] = pd.Categorical(commute_y["Mode"], categories=modes, ordered=True)
+    commute_y = commute_y.sort_values("Mode")
 
     fig_commute = px.bar(
         commute_y,
-        x="Region",
-        y="Share",
-        color="Mode",
-        barmode="stack",
-        labels={"Share": "Share of workers (%)"},
-        category_orders={"Region": REGIONS},
+        x="Mode",
+        y=metric_col,
+        color="Region",
+        barmode="group",
+        text=metric_col,
+        labels={metric_col: value_label, "Mode": "Transport mode"},
+        category_orders={"Mode": modes, "Region": REGIONS},
         title="Mode of transport to work",
     )
-    st.plotly_chart(fig_commute, use_container_width=True)
+    fig_commute.update_traces(texttemplate=text_tmpl, textposition="outside")
+    fig_commute.update_layout(
+        height=500,
+        margin=dict(l=20, r=20, t=50, b=40),
+        legend_title_text="",
+        yaxis_title=value_label,
+        xaxis_title="",
+    )
+    fig_commute.update_xaxes(tickangle=-45)
+    st.plotly_chart(fig_commute, use_container_width=True, config={"displayModeBar": False})
+
+    left_pie, right_pie = st.columns(2, gap="large")
+
+    with left_pie:
+        roi_data = commute_all[commute_all["Region"] == ROI].copy()
+        roi_data = roi_data[(roi_data["Share"].notna()) & (roi_data["Share"] > 0)].copy()
+        roi_data = roi_data[~roi_data["Mode"].eq("All means of travel")].copy()
+
+        if not roi_data.empty:
+            fig_roi_pie = px.pie(
+                roi_data,
+                values="Share",
+                names="Mode",
+                title=f"{ROI} - Transport mode share (%)",
+                hole=0.4,
+            )
+            fig_roi_pie.update_traces(textinfo="percent")
+            fig_roi_pie.update_layout(
+                height=420,
+                margin=dict(l=20, r=20, t=50, b=20),
+                legend_title_text="",
+            )
+            st.plotly_chart(fig_roi_pie, use_container_width=True, config={"displayModeBar": False})
+        else:
+            st.info(f"No percentage data available for {ROI}")
+
+    with right_pie:
+        ni_data = commute_all[commute_all["Region"] == NI].copy()
+        ni_data = ni_data[(ni_data["Share"].notna()) & (ni_data["Share"] > 0)].copy()
+        ni_data = ni_data[~ni_data["Mode"].eq("All means of travel")].copy()
+
+        if not ni_data.empty:
+            fig_ni_pie = px.pie(
+                ni_data,
+                values="Share",
+                names="Mode",
+                title=f"{NI} - Transport mode share (%)",
+                hole=0.4,
+            )
+            fig_ni_pie.update_traces(textinfo="percent")
+            fig_ni_pie.update_layout(
+                height=420,
+                margin=dict(l=20, r=20, t=50, b=20),
+                legend_title_text="",
+            )
+            st.plotly_chart(fig_ni_pie, use_container_width=True, config={"displayModeBar": False})
+        else:
+            st.info(f"No percentage data available for {NI}")
+
 else:
     st.info("Commuting mode data not yet integrated.")
 
-st.divider()
+#cross-border commuting
+st.header("Cross-border commuting")
 
+CROSS_PATH = CLEAN_DIR / "cross_border_commuters.csv"
 
-#economic output (contextual)
-st.header("Economic output (contextual)")
+if CROSS_PATH.exists():
+    cross = pd.read_csv(CROSS_PATH)
+    _ensure_cols(cross, ["Year", "Region", "Age group", "Persons"])
 
-if GDP_PATH.exists():
-    gdp = load_gdp(GDP_PATH)
-    gdp = gdp[gdp["Region"].isin(regions)]
+    cross["Year"] = pd.to_numeric(cross["Year"], errors="coerce").astype(int)
+    cross["Region"] = cross["Region"].astype(str).str.strip()
+    cross["Age group"] = cross["Age group"].astype(str).str.strip()
+    cross["Persons"] = pd.to_numeric(cross["Persons"], errors="coerce")
 
-    fig_gdp = px.line(
-        gdp,
-        x="Year",
-        y="GDP",
-        color="Region",
-        markers=True,
-        category_orders={"Region": REGIONS},
-        title="GDP over time",
-    )
-    st.plotly_chart(fig_gdp, use_container_width=True)
+    cross = cross[cross["Region"].isin(regions)].copy()
 
-    st.caption("GDP is sourced from national accounts and is presented separately from census-derived indicators.")
+    if cross.empty:
+        st.info("Cross-border commuting file is present but contains no rows after filtering.")
+    else:
+        cross_year = int(cross["Year"].max())
+        cross_y = cross[cross["Year"] == cross_year].copy()
+
+        #sort age groups
+        ages = list(cross_y["Age group"].unique())
+        all_label = "All ages"
+        ages_no_all = [a for a in ages if a != all_label]
+
+        def _age_key(s: str) -> tuple:
+            #extract first number from age group string
+            s = str(s).strip()
+            digits = ""
+            for ch in s:
+                if ch.isdigit():
+                    digits += ch
+                elif digits:
+                    break
+            return (int(digits) if digits else 999, s)
+
+        ages_no_all = sorted(ages_no_all, key=_age_key)
+        if all_label in ages:
+            ages_order = ages_no_all + [all_label]
+        else:
+            ages_order = ages_no_all
+
+        cross_y["Age group"] = pd.Categorical(cross_y["Age group"], categories=ages_order, ordered=True)
+        cross_y = cross_y.sort_values("Age group")
+
+        fig_cross = px.bar(
+            cross_y,
+            x="Age group",
+            y="Persons",
+            color="Region",
+            barmode="group",
+            text="Persons",
+            labels={"Persons": "Cross-border commuters (persons)", "Age group": "Age group"},
+            category_orders={"Age group": ages_order, "Region": REGIONS},
+            title=f"Cross-border commuters for work — {cross_year}",
+        )
+        fig_cross.update_traces(texttemplate="%{text:,.0f}", textposition="outside")
+        fig_cross.update_layout(
+            height=520,
+            margin=dict(l=20, r=20, t=50, b=120),
+            legend_title_text="",
+            yaxis_title="Cross-border commuters (persons)",
+            xaxis_title="",
+        )
+        fig_cross.update_xaxes(tickangle=-45)
+        st.plotly_chart(fig_cross, use_container_width=True, config={"displayModeBar": False})
+
 else:
-    st.info("GDP data not yet integrated.")
+    st.info("Cross-border commuting data not yet integrated. Run the CPNI53 cleaning script to generate the cleaned CSV.")
 
 
-with st.expander("Methods & comparability notes"):
-    st.markdown(
-        """
-- The dashboard reads only from `data/cleaned/`.
-- CPNI36 is used for ILO unemployment rates by sex (persons aged 16+).
-- CPNI35 is used for labour force and unemployed counts and within-labour-force shares (persons aged 16+).
-- CPNI38 is used for sectoral composition of employment (persons aged 16+).
-- The joint label '2021/2022' is aligned to 2022 for consistent ordering and filtering.
+#GDP
+
+st.header("Economic output (GDP)")
+
+st.markdown(
+    """
+Gross Domestic Product (GDP) is a widely used indicator of economic scale and was considered for inclusion in the Economy section.
+
+However, GDP data for the Republic of Ireland and Northern Ireland are compiled under different national accounting frameworks and are not directly comparable over time or across jurisdictions.
+In addition, GDP figures for the Republic of Ireland are known to be significantly affected by multinational profit-shifting, limiting their usefulness as indicators of underlying domestic economic conditions.
+
+For these reasons, GDP is not used as an analytical variable in the Economy section, which instead focuses on census-based labour market and commuting indicators where population coverage and cross-jurisdictional comparability can be more clearly defined.
+
+A single-year GDP figure is shown in the Overview page to provide high-level contextual information.
 """
-    )
+)

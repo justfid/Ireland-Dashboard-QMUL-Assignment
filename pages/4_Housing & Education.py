@@ -357,4 +357,3 @@ with right_col:
                 fig_occ.update_yaxes(range=[0, 100])
 
             st.plotly_chart(fig_occ, width="stretch", config={"displayModeBar": False})
-

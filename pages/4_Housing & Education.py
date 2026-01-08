@@ -9,17 +9,18 @@ import streamlit as st
 
 #page config
 st.set_page_config(
-    page_title="Living Conditions",
+    page_title="Housing & Education",
     page_icon="🏠",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 #paths
-CLEAN_DIR = Path("data/cleaned/living_conditions")
+CLEAN_DIR = Path("data/cleaned/housing_education")
 TENURE_PATH = CLEAN_DIR / "housing_tenure.csv"
 TYPE_PATH = CLEAN_DIR / "housing_type.csv"
 OCC_PATH = CLEAN_DIR / "housing_occupancy.csv"
+HH_SIZE_PATH = CLEAN_DIR / "household_size.csv"
 
 #constants
 ROI = "Republic of Ireland"
@@ -46,10 +47,9 @@ def _simplify_tenure_label(s: str) -> str:
 
 
 #page header
-st.title("🏠 Living Conditions")
+st.title("🏠 Housing & Education")
 st.write(
-    "This section examines structural and material aspects of how people live, using census-based indicators "
-    "where cross-jurisdictional comparability can be clearly defined."
+    "This section analyses housing and educational conditions using census-based measures that are comparable across jurisdictions."
 )
 st.divider()
 
@@ -64,9 +64,22 @@ with st.sidebar:
         default=REGIONS,
     )
 
+    st.markdown("---")
+    st.subheader("Display")
 
-#housing
+    display_mode = st.radio(
+        "Mode",
+        ["Percentages", "Absolute numbers"],
+        horizontal=True,
+        key="housing_display_mode",
+        help="applies to composition charts below (type/occupancy). tenure is not affected.",
+    )
+    st.caption("Note: tenure is not affected by the display mode toggle.")
+
+
 st.header("Housing")
+
+#tenure (unaffected by sidebar display_mode)
 st.subheader("Tenure")
 
 simplify_tenure = st.toggle(
@@ -201,7 +214,7 @@ st.subheader("Housing type & occupancy")
 
 left_col, right_col = st.columns(2, gap="large")
 
-#left: housing type (percent-only, 100% stacked)
+#type: percent-only, keep as-is
 with left_col:
     st.markdown("#### Type")
 
@@ -257,8 +270,7 @@ with left_col:
 
             st.caption("NOTE: Caravan... is not visible on the graph due to it being <0.25% of the housing stock in both regions")
 
-
-#right: housing occupancy
+#occupancy: toggle if Absolute exists, else percent-only
 with right_col:
     st.markdown("#### Occupancy")
 
@@ -266,12 +278,19 @@ with right_col:
         st.info("Housing occupancy data not yet integrated. Run clean_housing_occupancy.py to generate the cleaned CSV.")
     else:
         occ_all = pd.read_csv(OCC_PATH)
-        _ensure_cols(occ_all, ["Year", "Region", "Occupancy", "Percentage"])
+
+        if "Absolute" in occ_all.columns:
+            _ensure_cols(occ_all, ["Year", "Region", "Occupancy", "Percentage", "Absolute"])
+        else:
+            _ensure_cols(occ_all, ["Year", "Region", "Occupancy", "Percentage"])
 
         occ_all["Year"] = pd.to_numeric(occ_all["Year"], errors="coerce").astype(int)
         occ_all["Region"] = occ_all["Region"].astype(str).str.strip()
         occ_all["Occupancy"] = occ_all["Occupancy"].astype(str).str.strip()
         occ_all["Percentage"] = pd.to_numeric(occ_all["Percentage"], errors="coerce")
+
+        if "Absolute" in occ_all.columns:
+            occ_all["Absolute"] = pd.to_numeric(occ_all["Absolute"], errors="coerce")
 
         occ_all = occ_all[occ_all["Region"].isin(regions)].copy()
 
@@ -281,11 +300,8 @@ with right_col:
             year = int(occ_all["Year"].max())
             occ_y = occ_all[occ_all["Year"] == year].copy()
 
-            occ_y = occ_y.groupby(["Region", "Occupancy"], as_index=False)["Percentage"].sum()
-
-            check = occ_y.groupby("Region")["Percentage"].sum().round(1)
-            if not all(check.between(99.5, 100.5)):
-                raise ValueError(f"Occupancy percentages do not sum to 100 by region: {check.to_dict()}")
+            agg_cols = ["Percentage"] + (["Absolute"] if "Absolute" in occ_y.columns else [])
+            occ_y = occ_y.groupby(["Region", "Occupancy"], as_index=False)[agg_cols].sum()
 
             occ_order = [x for x in ["Occupied", "Vacant"] if x in occ_y["Occupancy"].unique()]
             remaining = [x for x in occ_y["Occupancy"].unique() if x not in occ_order]
@@ -294,24 +310,43 @@ with right_col:
             occ_y["Occupancy"] = pd.Categorical(occ_y["Occupancy"], categories=occ_order, ordered=True)
             occ_y = occ_y.sort_values("Occupancy")
 
+            if display_mode == "Absolute numbers" and "Absolute" in occ_y.columns:
+                metric_col = "Absolute"
+                value_label = "Dwellings (count)"
+                text_tmpl = "%{text:,.0f}"
+                title_suffix = "absolute"
+            else:
+                metric_col = "Percentage"
+                value_label = "Share of housing stock (%)"
+                text_tmpl = "%{text:.1f}%"
+                title_suffix = "percent"
+
+                check = occ_y.groupby("Region")["Percentage"].sum().round(1)
+                if not all(check.between(99.5, 100.5)):
+                    raise ValueError(f"Occupancy percentages do not sum to 100 by region: {check.to_dict()}")
+
             fig_occ = px.bar(
                 occ_y,
                 x="Region",
-                y="Percentage",
+                y=metric_col,
                 color="Occupancy",
                 barmode="stack",
-                text="Percentage",
-                labels={"Percentage": "Share of housing stock (%)", "Region": "", "Occupancy": "Status"},
-                title=f"Housing occupancy — {year}",
+                text=metric_col,
+                labels={metric_col: value_label, "Region": "", "Occupancy": "Status"},
+                title=f"Housing occupancy — {year} ({title_suffix})",
                 category_orders={"Region": REGIONS, "Occupancy": occ_order},
             )
-            fig_occ.update_traces(texttemplate="%{text:.1f}%", textposition="inside")
+            fig_occ.update_traces(texttemplate=text_tmpl, textposition="inside")
             fig_occ.update_layout(
                 height=520,
                 margin=dict(l=20, r=20, t=60, b=40),
                 legend_title_text="",
-                yaxis_range=[0, 100],
             )
+            if metric_col == "Percentage":
+                fig_occ.update_yaxes(range=[0, 100])
+
             st.plotly_chart(fig_occ, use_container_width=True, config={"displayModeBar": False})
 
-st.caption("Shares are within-region percentages of the total housing stock for the census year shown.")
+st.caption(
+    "display mode applies to occupancy where absolute counts exist. type remains percent-only by design. tenure is fixed (absolute bar + percent pies)."
+)

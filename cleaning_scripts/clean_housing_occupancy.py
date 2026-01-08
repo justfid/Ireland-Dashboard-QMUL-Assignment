@@ -7,8 +7,8 @@ import pandas as pd
 
 
 #constants
-RAW_DIR = Path("data/raw/living_conditions")
-CLEAN_DIR = Path("data/cleaned/living_conditions")
+RAW_DIR = Path("data/raw/housing_education")
+CLEAN_DIR = Path("data/cleaned/housing_education")
 
 TABLE_PREFIX = "CPNI32"
 OUT_PATH = CLEAN_DIR / "housing_occupancy.csv"

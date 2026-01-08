@@ -6,8 +6,12 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from typing import Final
+
+# Add project root to path for utils import
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import pandas as pd
 
@@ -20,7 +24,6 @@ from utils.cleaning import (
     ROI_LABEL,
     NI_LABEL,
     ALL_LABEL,
-    STANDARD_REGION_MAP,
 )
 
 #constants
@@ -172,7 +175,7 @@ def main() -> None:
     raw_dir.mkdir(parents=True, exist_ok=True)
     clean_dir.mkdir(parents=True, exist_ok=True)
 
-    raw_path = find_raw_file(raw_dir)
+    raw_path = find_raw_file(raw_dir, RAW_FILE_PREFIX)
     pop_time = load_population_over_time(clean_dir)
 
     cleaned = clean_median_age_over_time(raw_path, pop_time)

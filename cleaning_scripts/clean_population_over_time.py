@@ -3,8 +3,12 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from typing import Final
+
+# Add project root to path for utils import
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import pandas as pd
 
@@ -14,7 +18,8 @@ from utils.cleaning import (
     map_regions,
     clean_string_column,
     clean_numeric_column,
-    STANDARD_REGION_MAP,
+    ROI_LABEL,
+    NI_LABEL,
 )
 
 #constants
@@ -92,7 +97,7 @@ def clean_population_over_time(raw_path: Path) -> pd.DataFrame:
     out["Population"] = out["Population"].astype(int)
 
     #keep only ROI and NI rows
-    out = out[out["Region"].isin(STANDARD_REGION_MAP.values())]
+    out = out[out["Region"].isin([ROI_LABEL, NI_LABEL])]
     out = out.sort_values(["Region", "Year"]).reset_index(drop=True)
 
     #ensure 1 row per (Region, Year)
@@ -111,7 +116,7 @@ def main() -> None:
     raw_dir.mkdir(parents=True, exist_ok=True)
     clean_dir.mkdir(parents=True, exist_ok=True)
 
-    raw_path = find_raw_file(raw_dir)
+    raw_path = find_raw_file(raw_dir, RAW_FILE_PREFIX)
     cleaned = clean_population_over_time(raw_path)
 
     out_path = clean_dir / CLEAN_FILENAME

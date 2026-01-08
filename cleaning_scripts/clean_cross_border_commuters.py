@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import sys
 from pathlib import Path
-from typing import Final
+from typing import List
+
+# Add project root to path for utils import
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import pandas as pd
 

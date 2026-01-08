@@ -68,7 +68,6 @@ def _load_latest_census_populations() -> dict:
     region_map = {
         ROI: "ROI",
         NI: "NI",
-        ALL: "ALL",
     }
 
     out: dict = {}
@@ -80,6 +79,17 @@ def _load_latest_census_populations() -> dict:
         year = int(latest["Year"])
         pop = int(latest["Population"])
         out[key] = (f"{pop:,}", f"Census {year}")
+
+    # Calculate All-Island total if both ROI and NI exist
+    if "ROI" in out and "NI" in out:
+        roi_pop = int(out["ROI"][0].replace(",", ""))
+        ni_pop = int(out["NI"][0].replace(",", ""))
+        all_pop = roi_pop + ni_pop
+        # Use the most recent year from either region
+        roi_df = df[df["Region"] == ROI].sort_values("Year")
+        ni_df = df[df["Region"] == NI].sort_values("Year")
+        latest_year = max(int(roi_df.iloc[-1]["Year"]), int(ni_df.iloc[-1]["Year"]))
+        out["ALL"] = (f"{all_pop:,}", f"Census {latest_year}")
 
     return out
 

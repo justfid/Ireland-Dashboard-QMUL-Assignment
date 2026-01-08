@@ -136,7 +136,6 @@ def parse_census_year(census_year: str) -> int:
     
     raise ValueError(f"Could not parse Census Year '{census_year}' into a 4-digit year.")
 
-
 #region mapping
 def map_regions(df: pd.DataFrame, source_col: str, target_col: str = "Region", 
                 region_map: dict[str, str] = STANDARD_REGION_MAP) -> pd.DataFrame:
@@ -189,3 +188,4 @@ def clean_numeric_column(series: pd.Series, drop_na: bool = False) -> pd.Series:
     """
     result = pd.to_numeric(series, errors="coerce")
     return result.dropna() if drop_na else result
+

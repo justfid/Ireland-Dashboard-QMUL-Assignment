@@ -248,7 +248,7 @@ else:
                 margin=dict(l=40, r=20, t=40, b=40),
                 legend_title_text="",
             )
-            st.plotly_chart(fig_sex, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_sex, width="stretch", config={"displayModeBar": False})
 
 
 st.divider()
@@ -290,7 +290,7 @@ if SECTOR_PATH.exists():
         yaxis_title="Industry",
         xaxis_title=value_label,
     )
-    st.plotly_chart(fig_sector, use_container_width=True, config={"displayModeBar": False})
+    st.plotly_chart(fig_sector, width="stretch", config={"displayModeBar": False})
 
     st.caption("Industries are ordered by NACE section codes (A–U) shown in brackets, matching the joint publication ordering.")
 else:
@@ -338,7 +338,7 @@ if COMMUTE_PATH.exists():
         xaxis_title="",
     )
     fig_commute.update_xaxes(tickangle=-45)
-    st.plotly_chart(fig_commute, use_container_width=True, config={"displayModeBar": False})
+    st.plotly_chart(fig_commute, width="stretch", config={"displayModeBar": False})
 
     left_pie, right_pie = st.columns(2, gap="large")
 
@@ -361,7 +361,7 @@ if COMMUTE_PATH.exists():
                 margin=dict(l=20, r=20, t=50, b=20),
                 legend_title_text="",
             )
-            st.plotly_chart(fig_roi_pie, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_roi_pie, width="stretch", config={"displayModeBar": False})
         else:
             st.info(f"No percentage data available for {ROI}")
 
@@ -384,7 +384,7 @@ if COMMUTE_PATH.exists():
                 margin=dict(l=20, r=20, t=50, b=20),
                 legend_title_text="",
             )
-            st.plotly_chart(fig_ni_pie, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_ni_pie, width="stretch", config={"displayModeBar": False})
         else:
             st.info(f"No percentage data available for {NI}")
 
@@ -458,7 +458,7 @@ if CROSS_PATH.exists():
             xaxis_title="",
         )
         fig_cross.update_xaxes(tickangle=-45)
-        st.plotly_chart(fig_cross, use_container_width=True, config={"displayModeBar": False})
+        st.plotly_chart(fig_cross, width="stretch", config={"displayModeBar": False})
 
 else:
     st.info("Cross-border commuting data not yet integrated. Run the CPNI53 cleaning script to generate the cleaned CSV.")

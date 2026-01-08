@@ -144,7 +144,7 @@ else:
             xaxis_title="",
         )
         fig_abs.update_xaxes(tickangle=-35)
-        st.plotly_chart(fig_abs, use_container_width=True, config={"displayModeBar": False})
+        st.plotly_chart(fig_abs, width="stretch", config={"displayModeBar": False})
 
         left_pie, right_pie = st.columns(2, gap="large")
 
@@ -168,7 +168,7 @@ else:
                     margin=dict(l=20, r=20, t=60, b=20),
                     legend_title_text="",
                 )
-                st.plotly_chart(fig_roi, use_container_width=True, config={"displayModeBar": False})
+                st.plotly_chart(fig_roi, width="stretch", config={"displayModeBar": False})
 
         with right_pie:
             ni_data = tenure_y[tenure_y["Region"] == NI].copy()
@@ -190,7 +190,7 @@ else:
                     margin=dict(l=20, r=20, t=60, b=20),
                     legend_title_text="",
                 )
-                st.plotly_chart(fig_ni, use_container_width=True, config={"displayModeBar": False})
+                st.plotly_chart(fig_ni, width="stretch", config={"displayModeBar": False})
 
         st.caption(
             "Simplified tenure mapping (if enabled): "
@@ -277,7 +277,7 @@ with left_col:
             if metric_col == "Percentage":
                 fig_type.update_yaxes(range=[0, 100])
 
-            st.plotly_chart(fig_type, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_type, width="stretch", config={"displayModeBar": False})
 
             st.caption("NOTE: Caravan... is not visible on the graph due to it being <0.25% of the housing stock in both regions")
 
@@ -356,5 +356,5 @@ with right_col:
             if metric_col == "Percentage":
                 fig_occ.update_yaxes(range=[0, 100])
 
-            st.plotly_chart(fig_occ, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_occ, width="stretch", config={"displayModeBar": False})
 

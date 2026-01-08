@@ -197,7 +197,7 @@ with c1:
         title=f"{co2_metric} over time",
     )
     fig_co2.update_layout(height=360, margin=dict(l=10, r=10, t=60, b=10))
-    st.plotly_chart(fig_co2, use_container_width=True)
+    st.plotly_chart(fig_co2, width="stretch")
 
 with c2:
     #Different chart type: bar snapshot for latest year
@@ -211,7 +211,7 @@ with c2:
         text_auto=".2f",
     )
     fig_co2_bar.update_layout(height=360, margin=dict(l=10, r=10, t=60, b=10))
-    st.plotly_chart(fig_co2_bar, use_container_width=True)
+    st.plotly_chart(fig_co2_bar, width="stretch")
 
 st.divider()
 
@@ -233,7 +233,7 @@ with w1:
         title=f"{weather_metric} by month (2024)",
     )
     fig_weather.update_layout(height=360, margin=dict(l=10, r=10, t=60, b=10))
-    st.plotly_chart(fig_weather, use_container_width=True)
+    st.plotly_chart(fig_weather, width="stretch")
 
 with w2:
     #Different chart type: heatmap of month vs region for temperatures/rainfall
@@ -246,7 +246,7 @@ with w2:
         labels=dict(x="Month", y="Region", color=weather_metric),
     )
     fig_heat.update_layout(height=360, margin=dict(l=10, r=10, t=60, b=10))
-    st.plotly_chart(fig_heat, use_container_width=True)
+    st.plotly_chart(fig_heat, width="stretch")
 
 st.divider()
 
@@ -267,7 +267,7 @@ with a1:
         title=f"{aq_metric} over time (daily)",
     )
     fig_aq.update_layout(height=360, margin=dict(l=10, r=10, t=60, b=10))
-    st.plotly_chart(fig_aq, use_container_width=True)
+    st.plotly_chart(fig_aq, width="stretch")
 
 with a2:
     #composition chart: PM2.5 quality band shares
@@ -283,7 +283,7 @@ with a2:
     )
     fig_band.update_traces(textposition="inside", textinfo="percent+label")
     fig_band.update_layout(height=360, margin=dict(l=10, r=10, t=60, b=10), showlegend=False)
-    st.plotly_chart(fig_band, use_container_width=True)
+    st.plotly_chart(fig_band, width="stretch")
 
 #optional: a simple “latest day” gauge for PM2.5 (variety)
 if "PM2.5 (µg/m³)" in data["air_quality"].columns:
@@ -299,7 +299,7 @@ if "PM2.5 (µg/m³)" in data["air_quality"].columns:
                 gauge={"axis": {"range": [0, 50]}},
             ))
             gauge.update_layout(height=240, margin=dict(l=10, r=10, t=60, b=10))
-            st.plotly_chart(gauge, use_container_width=True)
+            st.plotly_chart(gauge, width="stretch")
 
 st.divider()
 
@@ -320,7 +320,7 @@ with st.expander("Notes & methodology (placeholder)"):
 
 if show_debug:
     st.subheader("Debug: underlying dummy data")
-    st.write("CO₂"); st.dataframe(only_regions(data["co2"]), use_container_width=True, hide_index=True)
-    st.write("Weather"); st.dataframe(only_regions(data["weather"]), use_container_width=True, hide_index=True)
-    st.write("Air quality"); st.dataframe(only_regions(data["air_quality"]), use_container_width=True, hide_index=True)
-    st.write("PM2.5 bands"); st.dataframe(only_regions(data["aq_band"]), use_container_width=True, hide_index=True)
+    st.write("CO₂"); st.dataframe(only_regions(data["co2"]), width="stretch", hide_index=True)
+    st.write("Weather"); st.dataframe(only_regions(data["weather"]), width="stretch", hide_index=True)
+    st.write("Air quality"); st.dataframe(only_regions(data["air_quality"]), width="stretch", hide_index=True)
+    st.write("PM2.5 bands"); st.dataframe(only_regions(data["aq_band"]), width="stretch", hide_index=True)

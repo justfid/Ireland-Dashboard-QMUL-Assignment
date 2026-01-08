@@ -73,5 +73,5 @@ with st.expander("View full sources table (raw CSV)"):
     st.dataframe(
         sources_df,
         hide_index=True,
-        use_container_width=True,
+        width="stretch",
     )

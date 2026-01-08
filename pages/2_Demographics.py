@@ -196,6 +196,11 @@ with st.sidebar:
 
 #page stuff
 st.title("👥 Demographics")
+st.write(
+    "This section examines population size, structure, and ageing using census data from the Republic of Ireland "
+    "and Northern Ireland. All indicators are derived from official census publications and prioritise comparability "
+    "across jurisdictions."
+)
 st.caption(
     "All charts use census observations only. Growth and trends are measured between consecutive censuses."
 )
@@ -233,7 +238,7 @@ fig = px.line(
     category_orders={"Region": REGIONS},
 )
 fig.update_yaxes(tickformat="~s")
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width="stretch")
 
 growth = make_growth_between_census(pop_f)
 metric_mode = st.radio(
@@ -251,7 +256,7 @@ fig_g = px.bar(
     barmode="group",
     category_orders={"Region": REGIONS},
 )
-st.plotly_chart(fig_g, use_container_width=True)
+st.plotly_chart(fig_g, width="stretch")
 
 st.caption(
     "Note: growth is measured between consecutive census observations (no annual interpolation)."
@@ -265,7 +270,7 @@ st.header("Population structure (age / sex)")
 fig_pyr = make_population_pyramid(
     pop_dist, pyramid_region, pyramid_year, pyramid_mode
 )
-st.plotly_chart(fig_pyr, use_container_width=True)
+st.plotly_chart(fig_pyr, width="stretch")
 
 st.caption(
     "Sex-specific population structure is shown via the pyramid only to avoid overloading summary trend charts."
@@ -294,7 +299,7 @@ with col_left:
         markers=True,
         category_orders={"Region": REGIONS},
     )
-    st.plotly_chart(fig_ma, use_container_width=True)
+    st.plotly_chart(fig_ma, width="stretch")
 
     st.caption(
         "All-Island median age values are population-weighted estimates derived from ROI and NI "
@@ -316,7 +321,7 @@ with col_right:
         markers=True,
         category_orders={"Region": REGIONS},
     )
-    st.plotly_chart(fig_dr, use_container_width=True)
+    st.plotly_chart(fig_dr, width="stretch")
 
     st.caption(
         "All-Island dependency ratio values are population-weighted estimates derived from ROI and NI "

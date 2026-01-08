@@ -7,16 +7,15 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 st.set_page_config(
-    page_title="Environment | ROI + NI Dashboard",
-    page_icon="🌿",
+    page_title="Cultural Identity",
+    page_icon="🌍",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-st.title("🌿 Environment")
+st.title("� Cultural Identity")
 st.write(
-    "This page compares environmental indicators for the Republic of Ireland (ROI) and Northern Ireland (NI), "
-    "including **CO₂ emissions**, **weather patterns** (planned: Open-Meteo), and **air quality** (planned: OpenAQ)."
+    "This section examines cultural characteristics including religion, ethnicity, languages, marriage patterns, and migration origins across both jurisdictions."
 )
 st.caption("All values shown here are **dummy data** for development/testing and will be replaced with live API data.")
 

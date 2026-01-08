@@ -25,6 +25,8 @@ OCC_PATH = CLEAN_DIR / "housing_occupancy.csv"
 HH_SIZE_PATH = CLEAN_DIR / "household_size.csv"
 HH_COMP_PATH = CLEAN_DIR / "household_composition.csv"
 EDU_QUAL_PATH = CLEAN_DIR / "education_qualifications.csv"
+HEALTH_PATH = CLEAN_DIR / "general_health.csv"
+HEALTH_AGE_PATH = CLEAN_DIR / "general_health_by_age.csv"
 
 
 #helpers
@@ -543,3 +545,142 @@ else:
             )
             fig_edu.update_xaxes(tickangle=-35)
             st.plotly_chart(fig_edu, width="stretch", config={"displayModeBar": False})
+
+st.divider()
+
+#health
+st.header("Health")
+
+if not HEALTH_PATH.exists():
+    st.info("Health indicators data will be integrated here.")
+else:
+    health_all = pd.read_csv(HEALTH_PATH)
+    ensure_cols(health_all, ["Year", "Region", "Rating", "Percentage", "Absolute"])
+
+    health_all["Year"] = pd.to_numeric(health_all["Year"], errors="coerce").astype(int)
+    health_all["Region"] = health_all["Region"].astype(str).str.strip()
+    health_all["Rating"] = health_all["Rating"].astype(str).str.strip()
+    health_all["Percentage"] = pd.to_numeric(health_all["Percentage"], errors="coerce")
+    health_all["Absolute"] = pd.to_numeric(health_all["Absolute"], errors="coerce")
+
+    health_all = health_all[health_all["Region"].isin(regions)].copy()
+
+    if health_all.empty:
+        st.info("General health file is present but contains no rows after filtering.")
+    else:
+        year = int(health_all["Year"].max())
+        health_y = health_all[health_all["Year"] == year].copy()
+
+        rating_order = ["Very good", "Good", "Fair", "Bad", "Very Bad", "Not stated"]
+        existing_ratings = [r for r in rating_order if r in health_y["Rating"].unique()]
+
+        health_y["Rating"] = pd.Categorical(health_y["Rating"], categories=existing_ratings, ordered=True)
+        health_y = health_y.sort_values(["Region", "Rating"])
+
+        if display_mode == "Absolute numbers":
+            metric_col = "Absolute"
+            value_label = "Population (count)"
+            text_tmpl = "%{text:,.0f}"
+            title_suffix = "absolute"
+        else:
+            metric_col = "Percentage"
+            value_label = "Share of population (%)"
+            text_tmpl = "%{text:.1f}%"
+            title_suffix = "percent"
+
+        fig_health = px.bar(
+            health_y,
+            x="Rating",
+            y=metric_col,
+            color="Region",
+            barmode="group",
+            text=metric_col,
+            labels={metric_col: value_label, "Rating": ""},
+            title=f"General health — {year} ({title_suffix})",
+            category_orders={"Region": REGIONS, "Rating": existing_ratings},
+        )
+        fig_health.update_traces(texttemplate=text_tmpl, textposition="outside")
+        fig_health.update_layout(
+            height=520,
+            margin=dict(l=20, r=20, t=60, b=100),
+            legend_title_text="",
+        )
+        fig_health.update_xaxes(tickangle=-35)
+        st.plotly_chart(fig_health, width="stretch", config={"displayModeBar": False})
+        
+        st.caption("Note: General health ratings are self-reported by census respondents.")
+
+st.divider()
+
+st.subheader("General health by age")
+
+if not HEALTH_AGE_PATH.exists():
+    st.info("Health by age data not yet integrated. Run clean_general_health_by_age.py to generate the cleaned CSV.")
+else:
+    health_age_all = pd.read_csv(HEALTH_AGE_PATH)
+    ensure_cols(health_age_all, ["Year", "Region", "Rating", "Age_Bracket", "Percentage"])
+
+    health_age_all["Year"] = health_age_all["Year"].astype(str).str.strip()
+    health_age_all["Region"] = health_age_all["Region"].astype(str).str.strip()
+    health_age_all["Rating"] = health_age_all["Rating"].astype(str).str.strip()
+    health_age_all["Age_Bracket"] = health_age_all["Age_Bracket"].astype(str).str.strip()
+    health_age_all["Percentage"] = pd.to_numeric(health_age_all["Percentage"], errors="coerce")
+
+    health_age_all = health_age_all[health_age_all["Region"].isin(regions)].copy()
+
+    if health_age_all.empty:
+        st.info("Health by age file is present but contains no rows after filtering.")
+    else:
+        rating_order = ["Very good", "Good", "Fair", "Bad", "Very Bad", "Not stated"]
+        available_ratings = [r for r in rating_order if r in health_age_all["Rating"].unique()]
+
+        selected_rating = st.selectbox(
+            "Select health rating",
+            available_ratings,
+            index=1 if "Good" in available_ratings else 0,
+            key="health_age_rating_selector",
+        )
+
+        year = health_age_all["Year"].iloc[0]
+        health_age_filtered = health_age_all[health_age_all["Rating"] == selected_rating].copy()
+
+        if health_age_filtered.empty:
+            st.info(f"No data available for rating: {selected_rating}")
+        else:
+            age_order = [
+                "0 - 4 years", "5 - 9 years", "10 - 14 years", "15 - 19 years",
+                "20 - 24 years", "25 - 29 years", "30 - 34 years", "35 - 39 years",
+                "40 - 44 years", "45 - 49 years", "50 - 54 years", "55 - 59 years",
+                "60 - 64 years", "65 - 69 years", "70 - 74 years", "75 - 79 years",
+                "80 - 84 years", "85 years and over"
+            ]
+            existing_ages = [a for a in age_order if a in health_age_filtered["Age_Bracket"].unique()]
+
+            health_age_filtered["Age_Bracket"] = pd.Categorical(
+                health_age_filtered["Age_Bracket"],
+                categories=existing_ages,
+                ordered=True
+            )
+            health_age_filtered = health_age_filtered.sort_values(["Age_Bracket", "Region"])
+
+            fig_health_age = px.bar(
+                health_age_filtered,
+                x="Age_Bracket",
+                y="Percentage",
+                color="Region",
+                barmode="group",
+                text="Percentage",
+                labels={"Percentage": "Share of age group (%)", "Age_Bracket": "Age group"},
+                title=f"General health: '{selected_rating}' by age — {year}",
+                category_orders={"Region": REGIONS, "Age_Bracket": existing_ages},
+            )
+            fig_health_age.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
+            fig_health_age.update_layout(
+                height=520,
+                margin=dict(l=20, r=20, t=60, b=120),
+                legend_title_text="",
+            )
+            fig_health_age.update_xaxes(tickangle=-45)
+            st.plotly_chart(fig_health_age, width="stretch", config={"displayModeBar": False})
+
+            st.caption(f"Percentage of each age group reporting '{selected_rating}' general health.")

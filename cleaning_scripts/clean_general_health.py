@@ -1,0 +1,132 @@
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+from typing import List
+
+# Add project root to path for utils import
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+import pandas as pd
+
+from utils.cleaning import (
+    ensure_cols,
+    latest_timestamped_file,
+    parse_census_year,
+    map_regions,
+    clean_string_column,
+    clean_numeric_column,
+)
+
+#constants
+RAW_DIR = Path("data/raw/social_indicators")
+CLEAN_DIR = Path("data/cleaned/social_indicators")
+
+TABLE_PREFIX = "CPNI24"
+OUT_PATH = CLEAN_DIR / "general_health.csv"
+
+REQUIRED_COLS: List[str] = [
+    "Statistic Label",
+    "Census Year",
+    "Ireland and Northern Ireland",
+    "General Health",
+    "UNIT",
+    "VALUE",
+]
+
+#rows to drop (totals only - after removing prefix)
+DROP_RATINGS = {
+    "All",
+}
+
+
+def clean_general_health(raw_path: Path) -> pd.DataFrame:
+    df = pd.read_csv(raw_path)
+    ensure_cols(df, REQUIRED_COLS)
+    print(f"Initial rows: {len(df)}")
+    print(f"Unique Statistic Labels: {df['Statistic Label'].unique()}")
+
+    df["Statistic Label"] = clean_string_column(df["Statistic Label"])
+    df["Census Year"] = clean_string_column(df["Census Year"])
+    df["Ireland and Northern Ireland"] = clean_string_column(df["Ireland and Northern Ireland"])
+    df["General Health"] = clean_string_column(df["General Health"])
+    df["UNIT"] = clean_string_column(df["UNIT"])
+
+    df["VALUE"] = clean_numeric_column(df["VALUE"])
+    df = df.dropna(subset=["VALUE"]).copy()
+    print(f"After dropping NaN values: {len(df)}")
+
+    df = map_regions(df, "Ireland and Northern Ireland", "Region")
+
+    df["Year"] = df["Census Year"].apply(parse_census_year).astype(int)
+    df = df.rename(columns={"General Health": "Rating"})
+
+    #clean rating labels (remove "General health - " prefix)
+    df["Rating"] = df["Rating"].str.replace("General health - ", "", regex=False)
+    print(f"Unique ratings before drop: {df['Rating'].unique()}")
+
+    #drop totals (All) BEFORE pivoting
+    df = df[~df["Rating"].isin(DROP_RATINGS)].copy()
+    print(f"After dropping 'All': {len(df)}")
+    print(f"Unique ratings after drop: {df['Rating'].unique()}")
+    print(f"\nSample rows before pivot:")
+    print(df[['Region', 'Rating', 'UNIT', 'VALUE']].head(20))
+
+    #validate units
+    unit_map = {"%": "Percentage", "Number": "Absolute"}
+    df["UNIT_M"] = df["UNIT"].map(unit_map)
+    if df["UNIT_M"].isna().any():
+        bad = sorted(df.loc[df["UNIT_M"].isna(), "UNIT"].unique())
+        raise ValueError(f"Unexpected UNIT values encountered: {bad}")
+
+    #pivot UNIT -> columns
+    out = (
+        df[["Year", "Region", "Rating", "UNIT_M", "VALUE"]]
+        .rename(columns={"UNIT_M": "unit", "VALUE": "value"})
+        .pivot_table(
+            index=["Year", "Region", "Rating"],
+            columns="unit",
+            values="value",
+            aggfunc="first",
+        )
+        .reset_index()
+    )
+
+    if "Percentage" not in out.columns or "Absolute" not in out.columns:
+        raise ValueError(f"Expected both Percentage and Absolute after pivot; got: {list(out.columns)}")
+
+    out["Percentage"] = pd.to_numeric(out["Percentage"], errors="coerce")
+    out["Absolute"] = pd.to_numeric(out["Absolute"], errors="coerce")
+
+    if out[["Percentage", "Absolute"]].isna().any().any():
+        raise ValueError("Found NaNs in Percentage/Absolute after pivot + coercion")
+
+    out["Absolute"] = out["Absolute"].round(0).astype(int)
+
+    print(f"\nAfter pivot:")
+    print(out)
+
+    #sanity check: percentages should sum to ~100 per region/year
+    check = out.groupby(["Region", "Year"])["Percentage"].sum().round(1)
+    print(f"\nPercentage sums by region/year:")
+    print(check)
+    if not all(check.between(99.0, 101.0)):
+        raise ValueError(f"General health percentages do not sum to ~100 by region/year: {check.to_dict()}")
+
+    out = out.sort_values(["Year", "Region", "Rating"]).reset_index(drop=True)
+
+    return out
+
+
+def main() -> None:
+    CLEAN_DIR.mkdir(parents=True, exist_ok=True)
+
+    raw_path = latest_timestamped_file(RAW_DIR, TABLE_PREFIX)
+    cleaned = clean_general_health(raw_path)
+
+    cleaned.to_csv(OUT_PATH, index=False)
+    print(f"Wrote {len(cleaned)} rows to {OUT_PATH}")
+
+
+if __name__ == "__main__":
+    main()

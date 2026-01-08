@@ -11,18 +11,20 @@ from utils.common import ensure_cols, ROI, NI, REGIONS
 
 #page config
 st.set_page_config(
-    page_title="Housing & Education",
-    page_icon="🏠",
+    page_title="Social Indicators",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 #paths
-CLEAN_DIR = Path("data/cleaned/housing_education")
+CLEAN_DIR = Path("data/cleaned/social_indicators")
 TENURE_PATH = CLEAN_DIR / "housing_tenure.csv"
 TYPE_PATH = CLEAN_DIR / "housing_type.csv"
 OCC_PATH = CLEAN_DIR / "housing_occupancy.csv"
 HH_SIZE_PATH = CLEAN_DIR / "household_size.csv"
+HH_COMP_PATH = CLEAN_DIR / "household_composition.csv"
+EDU_QUAL_PATH = CLEAN_DIR / "education_qualifications.csv"
 
 
 #helpers
@@ -41,9 +43,9 @@ def _simplify_tenure_label(s: str) -> str:
 
 
 #page header
-st.title("🏠 Housing & Education")
+st.title("📊 Social Indicators")
 st.write(
-    "This section analyses housing and educational conditions using census-based measures that are comparable across jurisdictions."
+    "This section examines key social metrics including housing, education, and health using census-based measures that are comparable across jurisdictions."
 )
 st.divider()
 
@@ -357,3 +359,187 @@ with right_col:
                 fig_occ.update_yaxes(range=[0, 100])
 
             st.plotly_chart(fig_occ, width="stretch", config={"displayModeBar": False})
+
+st.divider()
+
+#household composition
+st.subheader("Household composition")
+
+if not HH_COMP_PATH.exists():
+    st.info("Household composition data not yet integrated. Run clean_household_composition.py to generate the cleaned CSV.")
+else:
+    comp_all = pd.read_csv(HH_COMP_PATH)
+    ensure_cols(comp_all, ["Year", "Region", "Composition", "Percentage", "Absolute"])
+
+    comp_all["Year"] = pd.to_numeric(comp_all["Year"], errors="coerce").astype(int)
+    comp_all["Region"] = comp_all["Region"].astype(str).str.strip()
+    comp_all["Composition"] = comp_all["Composition"].astype(str).str.strip()
+    comp_all["Percentage"] = pd.to_numeric(comp_all["Percentage"], errors="coerce")
+    comp_all["Absolute"] = pd.to_numeric(comp_all["Absolute"], errors="coerce")
+
+    comp_all = comp_all[comp_all["Region"].isin(regions)].copy()
+
+    if comp_all.empty:
+        st.info("Household composition file is present but contains no rows after filtering.")
+    else:
+        year = int(comp_all["Year"].max())
+        comp_y = comp_all[comp_all["Year"] == year].copy()
+
+        comp_order = sorted(comp_y["Composition"].unique())
+
+        comp_y["Composition"] = pd.Categorical(comp_y["Composition"], categories=comp_order, ordered=True)
+        comp_y = comp_y.sort_values(["Region", "Composition"])
+
+        if display_mode == "Absolute numbers":
+            metric_col = "Absolute"
+            value_label = "Households (count)"
+            text_tmpl = "%{text:,.0f}"
+            title_suffix = "absolute"
+        else:
+            metric_col = "Percentage"
+            value_label = "Share of households (%)"
+            text_tmpl = "%{text:.1f}%"
+            title_suffix = "percent"
+
+        fig_comp = px.bar(
+            comp_y,
+            y="Composition",
+            x=metric_col,
+            color="Region",
+            barmode="group",
+            text=metric_col,
+            orientation="h",
+            labels={metric_col: value_label, "Composition": ""},
+            title=f"Household composition — {year} ({title_suffix})",
+            category_orders={"Region": REGIONS, "Composition": comp_order},
+        )
+        fig_comp.update_traces(texttemplate=text_tmpl, textposition="outside")
+        fig_comp.update_layout(
+            height=480,
+            margin=dict(l=20, r=20, t=60, b=40),
+            legend_title_text="",
+        )
+        st.plotly_chart(fig_comp, width="stretch", config={"displayModeBar": False})
+
+st.divider()
+
+#education
+st.header("Education")
+
+st.subheader("Qualification classification comparison")
+st.write(
+    "The education systems in the Republic of Ireland and Northern Ireland operate under different frameworks and qualification structures. "
+    "This table maps comparable education levels across both jurisdictions to enable cross-border comparison."
+)
+
+classification_data = {
+    "Level": [
+        "Basic",
+        "Intermediate",
+        "Advanced",
+        "Higher/Professional",
+    ],
+    "Republic of Ireland": [
+        "Primary, Junior Cert (NFQ 1-3)",
+        "Leaving Cert, Vocational (NFQ 4-5)",
+        "Higher Cert, Apprenticeship (NFQ 6)",
+        "Bachelor to Doctorate (NFQ 7-10)",
+    ],
+    "Northern Ireland": [
+        "1-4 GCSEs, O levels, 1 AS, NVQ 1",
+        "5+ GCSEs (A*-C), 1-3 AS, NVQ 2, BTEC",
+        "2+ A Levels, 4+ AS, NVQ 3, OND/ONC",
+        "Degree, Foundation degree, NVQ 4+, HND/HNC",
+    ],
+}
+
+classification_df = pd.DataFrame(classification_data)
+
+st.dataframe(
+    classification_df,
+    hide_index=True,
+    use_container_width=True,
+)
+
+st.caption("NFQ = National Framework of Qualifications (ROI) | NVQ = National Vocational Qualification (NI)")
+
+st.divider()
+
+st.subheader("Educational attainment")
+
+if not EDU_QUAL_PATH.exists():
+    st.info("Education qualifications data not yet integrated. Run clean_education_qualifications.py to generate the cleaned CSV.")
+else:
+    edu_all = pd.read_csv(EDU_QUAL_PATH)
+    ensure_cols(edu_all, ["Year", "Region", "Sex", "Qualification", "Percentage", "Absolute"])
+
+    edu_all["Year"] = pd.to_numeric(edu_all["Year"], errors="coerce").astype(int)
+    edu_all["Region"] = edu_all["Region"].astype(str).str.strip()
+    edu_all["Sex"] = edu_all["Sex"].astype(str).str.strip()
+    edu_all["Qualification"] = edu_all["Qualification"].astype(str).str.strip()
+    edu_all["Percentage"] = pd.to_numeric(edu_all["Percentage"], errors="coerce")
+    edu_all["Absolute"] = pd.to_numeric(edu_all["Absolute"], errors="coerce")
+
+    edu_all = edu_all[edu_all["Region"].isin(regions)].copy()
+
+    if edu_all.empty:
+        st.info("Education qualifications file is present but contains no rows after filtering.")
+    else:
+        sex_filter = st.radio(
+            "Sex",
+            ["Both sexes", "Male", "Female"],
+            horizontal=True,
+            key="edu_sex_filter",
+        )
+
+        year = int(edu_all["Year"].max())
+        edu_y = edu_all[edu_all["Year"] == year].copy()
+        edu_y = edu_y[edu_y["Sex"] == sex_filter].copy()
+
+        if edu_y.empty:
+            st.info(f"No data available for {sex_filter}.")
+        else:
+            qual_order = [
+                "Basic qualification",
+                "Intermediate and advanced qualification",
+                "Higher and professional qualification",
+                "Other qualification",
+                "Qualification not stated",
+            ]
+            existing_quals = [q for q in qual_order if q in edu_y["Qualification"].unique()]
+            remaining_quals = [q for q in edu_y["Qualification"].unique() if q not in qual_order]
+            qual_order = existing_quals + sorted(remaining_quals)
+
+            edu_y["Qualification"] = pd.Categorical(edu_y["Qualification"], categories=qual_order, ordered=True)
+            edu_y = edu_y.sort_values(["Region", "Qualification"])
+
+            if display_mode == "Absolute numbers":
+                metric_col = "Absolute"
+                value_label = "Population (count)"
+                text_tmpl = "%{text:,.0f}"
+                title_suffix = "absolute"
+            else:
+                metric_col = "Percentage"
+                value_label = "Share of population (%)"
+                text_tmpl = "%{text:.1f}%"
+                title_suffix = "percent"
+
+            fig_edu = px.bar(
+                edu_y,
+                x="Qualification",
+                y=metric_col,
+                color="Region",
+                barmode="group",
+                text=metric_col,
+                labels={metric_col: value_label, "Qualification": ""},
+                title=f"Educational attainment — {sex_filter} ({year}, {title_suffix})",
+                category_orders={"Region": REGIONS, "Qualification": qual_order},
+            )
+            fig_edu.update_traces(texttemplate=text_tmpl, textposition="outside")
+            fig_edu.update_layout(
+                height=520,
+                margin=dict(l=20, r=20, t=60, b=100),
+                legend_title_text="",
+            )
+            fig_edu.update_xaxes(tickangle=-35)
+            st.plotly_chart(fig_edu, width="stretch", config={"displayModeBar": False})

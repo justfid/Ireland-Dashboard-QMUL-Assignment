@@ -19,8 +19,8 @@ from utils.cleaning import (
 )
 
 #constants
-RAW_DIR = Path("data/raw/housing_education")
-CLEAN_DIR = Path("data/cleaned/housing_education")
+RAW_DIR = Path("data/raw/social_indicators")
+CLEAN_DIR = Path("data/cleaned/social_indicators")
 
 TABLE_PREFIX = "CPNI34"
 OUT_PATH = CLEAN_DIR / "housing_tenure.csv"

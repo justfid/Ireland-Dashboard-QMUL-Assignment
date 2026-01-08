@@ -1,5 +1,5 @@
-Year,Region,Occupancy,Percentage
-2022,Northern Ireland,Occupied,93.7
-2022,Northern Ireland,Vacant,6.3
-2022,Republic of Ireland,Occupied,88.61
-2022,Republic of Ireland,Vacant,11.39
+Year,Region,Occupancy,Percentage,Absolute
+2022,Northern Ireland,Occupied,93.7,767723
+2022,Northern Ireland,Vacant,6.3,51889
+2022,Republic of Ireland,Occupied,88.61,1871522
+2022,Republic of Ireland,Vacant,11.39,240599

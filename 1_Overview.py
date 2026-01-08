@@ -2,6 +2,7 @@ import streamlit as st
 from streamlit.components.v1 import html
 import pandas as pd
 from utils.generate_maps import render_ireland_map
+from utils.common import ROI, NI, ALL
 from typing import Tuple
 
 #constants / data
@@ -65,9 +66,9 @@ def _load_latest_census_populations() -> dict:
     df = df.dropna(subset=["Year", "Population"])
 
     region_map = {
-        "Republic of Ireland": "ROI",
-        "Northern Ireland": "NI",
-        "All-Island": "ALL",
+        ROI: "ROI",
+        NI: "NI",
+        ALL: "ALL",
     }
 
     out: dict = {}

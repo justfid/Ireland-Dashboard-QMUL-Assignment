@@ -8,6 +8,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
+from utils.common import ensure_cols, ROI, NI, ALL, ALL_REGIONS
+
 pyramid_year = 2022
 
 #page config
@@ -25,22 +27,16 @@ POP_DIST_PATH = CLEAN_DIR / "population_distribution.csv"
 MEDIAN_AGE_PATH = CLEAN_DIR / "median_age_over_time.csv"
 DEP_RATIO_PATH = CLEAN_DIR / "dependency_ratio_over_time.csv"
 
-ROI = "Republic of Ireland"
-NI = "Northern Ireland"
-ALL = "All-Island"
-REGIONS: List[str] = [ROI, NI, ALL]
+REGIONS = ALL_REGIONS
 
 
 #loaders
-def _ensure_cols(df: pd.DataFrame, cols: List[str]) -> None:
-    if not set(cols).issubset(df.columns):
-        raise ValueError(f"Expected columns {cols}, got {list(df.columns)}")
 
 
 @st.cache_data(show_spinner=False)
 def load_population_over_time(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
-    _ensure_cols(df, ["Year", "Region", "Population"])
+    ensure_cols(df, ["Year", "Region", "Population"])
 
     df["Year"] = pd.to_numeric(df["Year"], errors="coerce").astype(int)
     df["Population"] = pd.to_numeric(df["Population"], errors="coerce").astype(int)
@@ -53,7 +49,7 @@ def load_population_over_time(path: Path) -> pd.DataFrame:
 @st.cache_data(show_spinner=False)
 def load_population_distribution(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
-    _ensure_cols(df, ["Year", "Region", "Sex", "Age band", "Population"])
+    ensure_cols(df, ["Year", "Region", "Sex", "Age band", "Population"])
 
     df["Year"] = pd.to_numeric(df["Year"], errors="coerce").astype(int)
     df["Population"] = pd.to_numeric(df["Population"], errors="coerce").astype(int)
@@ -72,7 +68,7 @@ def load_population_distribution(path: Path) -> pd.DataFrame:
 @st.cache_data(show_spinner=False)
 def load_median_age(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
-    _ensure_cols(df, ["Year", "Region", "Median age"])
+    ensure_cols(df, ["Year", "Region", "Median age"])
 
     df["Year"] = pd.to_numeric(df["Year"], errors="coerce").astype(int)
     df["Median age"] = pd.to_numeric(df["Median age"], errors="coerce")
@@ -85,7 +81,7 @@ def load_median_age(path: Path) -> pd.DataFrame:
 @st.cache_data(show_spinner=False)
 def load_dependency_ratio(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
-    _ensure_cols(df, ["Year", "Region", "Dependency ratio"])
+    ensure_cols(df, ["Year", "Region", "Dependency ratio"])
 
     df["Year"] = pd.to_numeric(df["Year"], errors="coerce").astype(int)
     df["Dependency ratio"] = pd.to_numeric(df["Dependency ratio"], errors="coerce")

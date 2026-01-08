@@ -7,6 +7,8 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from utils.common import ensure_cols, ROI, NI, REGIONS
+
 
 #page config
 st.set_page_config(
@@ -25,21 +27,14 @@ SECTOR_PATH = CLEAN_DIR / "employment_by_sector.csv"
 COMMUTE_PATH = CLEAN_DIR / "commute_mode.csv"
 GDP_PATH = CLEAN_DIR / "gdp_over_time.csv"
 
-ROI = "Republic of Ireland"
-NI = "Northern Ireland"
-REGIONS: List[str] = [ROI, NI]
-
 
 #loaders
-def _ensure_cols(df: pd.DataFrame, cols: List[str]) -> None:
-    if not set(cols).issubset(df.columns):
-        raise ValueError(f"Expected columns {cols}, got {list(df.columns)}")
 
 
 @st.cache_data(show_spinner=False)
 def load_unemployment(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
-    _ensure_cols(df, ["Year", "Region", "Sex", "Unemployment rate"])
+    ensure_cols(df, ["Year", "Region", "Sex", "Unemployment rate"])
 
     df["Year"] = pd.to_numeric(df["Year"], errors="coerce").astype(int)
     df["Unemployment rate"] = pd.to_numeric(df["Unemployment rate"], errors="coerce")
@@ -53,7 +48,7 @@ def load_unemployment(path: Path) -> pd.DataFrame:
 @st.cache_data(show_spinner=False)
 def load_labour_snapshot(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
-    _ensure_cols(
+    ensure_cols(
         df,
         [
             "Year",
@@ -83,7 +78,7 @@ def load_labour_snapshot(path: Path) -> pd.DataFrame:
 @st.cache_data(show_spinner=False)
 def load_sector_employment(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
-    _ensure_cols(df, ["Year", "Region", "Sector", "Share", "Persons"])
+    ensure_cols(df, ["Year", "Region", "Sector", "Share", "Persons"])
 
     df["Year"] = pd.to_numeric(df["Year"], errors="coerce").astype(int)
     df["Share"] = pd.to_numeric(df["Share"], errors="coerce")
@@ -98,7 +93,7 @@ def load_sector_employment(path: Path) -> pd.DataFrame:
 @st.cache_data(show_spinner=False)
 def load_commute_modes(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
-    _ensure_cols(df, ["Year", "Region", "Mode", "Share", "Persons"])
+    ensure_cols(df, ["Year", "Region", "Mode", "Share", "Persons"])
 
     df["Year"] = pd.to_numeric(df["Year"], errors="coerce").astype(int)
     df["Share"] = pd.to_numeric(df["Share"], errors="coerce")
@@ -113,7 +108,7 @@ def load_commute_modes(path: Path) -> pd.DataFrame:
 @st.cache_data(show_spinner=False)
 def load_gdp(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
-    _ensure_cols(df, ["Year", "Region", "GDP"])
+    ensure_cols(df, ["Year", "Region", "GDP"])
 
     df["Year"] = pd.to_numeric(df["Year"], errors="coerce").astype(int)
     df["GDP"] = pd.to_numeric(df["GDP"], errors="coerce")
@@ -403,7 +398,7 @@ CROSS_PATH = CLEAN_DIR / "cross_border_commuters.csv"
 
 if CROSS_PATH.exists():
     cross = pd.read_csv(CROSS_PATH)
-    _ensure_cols(cross, ["Year", "Region", "Age group", "Persons"])
+    ensure_cols(cross, ["Year", "Region", "Age group", "Persons"])
 
     cross["Year"] = pd.to_numeric(cross["Year"], errors="coerce").astype(int)
     cross["Region"] = cross["Region"].astype(str).str.strip()

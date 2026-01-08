@@ -6,6 +6,8 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from utils.common import ensure_cols, ROI, NI, REGIONS
+
 
 #page config
 st.set_page_config(
@@ -22,16 +24,8 @@ TYPE_PATH = CLEAN_DIR / "housing_type.csv"
 OCC_PATH = CLEAN_DIR / "housing_occupancy.csv"
 HH_SIZE_PATH = CLEAN_DIR / "household_size.csv"
 
-#constants
-ROI = "Republic of Ireland"
-NI = "Northern Ireland"
-REGIONS = [ROI, NI]
-
 
 #helpers
-def _ensure_cols(df: pd.DataFrame, cols: list[str]) -> None:
-    if not set(cols).issubset(df.columns):
-        raise ValueError(f"Expected columns {cols}, got {list(df.columns)}")
 
 
 def _simplify_tenure_label(s: str) -> str:
@@ -92,7 +86,7 @@ if not TENURE_PATH.exists():
     st.info("Tenure data not yet integrated. Run clean_housing_tenure.py to generate the cleaned CSV.")
 else:
     tenure_all = pd.read_csv(TENURE_PATH)
-    _ensure_cols(tenure_all, ["Year", "Region", "Nature", "Percentage", "Absolute"])
+    ensure_cols(tenure_all, ["Year", "Region", "Nature", "Percentage", "Absolute"])
 
     tenure_all["Year"] = pd.to_numeric(tenure_all["Year"], errors="coerce").astype(int)
     tenure_all["Region"] = tenure_all["Region"].astype(str).str.strip()
@@ -214,7 +208,7 @@ st.subheader("Housing type & occupancy")
 
 left_col, right_col = st.columns(2, gap="large")
 
-#type: percent-only, keep as-is
+#type
 with left_col:
     st.markdown("#### Type")
 
@@ -222,12 +216,13 @@ with left_col:
         st.info("Housing type data not yet integrated. Run clean_housing_type.py to generate the cleaned CSV.")
     else:
         ht_all = pd.read_csv(TYPE_PATH)
-        _ensure_cols(ht_all, ["Year", "Region", "Type", "Percentage"])
+        ensure_cols(ht_all, ["Year", "Region", "Type", "Percentage", "Absolute"])
 
         ht_all["Year"] = pd.to_numeric(ht_all["Year"], errors="coerce").astype(int)
         ht_all["Region"] = ht_all["Region"].astype(str).str.strip()
         ht_all["Type"] = ht_all["Type"].astype(str).str.strip()
         ht_all["Percentage"] = pd.to_numeric(ht_all["Percentage"], errors="coerce")
+        ht_all["Absolute"] = pd.to_numeric(ht_all["Absolute"], errors="coerce")
 
         ht_all = ht_all[ht_all["Region"].isin(regions)].copy()
 
@@ -237,6 +232,9 @@ with left_col:
             year = int(ht_all["Year"].max())
             ht_y = ht_all[ht_all["Year"] == year].copy()
 
+            # collapse duplicates (safe after category merges)
+            ht_y = ht_y.groupby(["Region", "Type"], as_index=False)[["Percentage", "Absolute"]].sum()
+
             types = list(ht_y["Type"].dropna().unique())
             if "Not stated" in types:
                 types = [t for t in types if t != "Not stated"] + ["Not stated"]
@@ -244,28 +242,41 @@ with left_col:
             ht_y["Type"] = pd.Categorical(ht_y["Type"], categories=types, ordered=True)
             ht_y = ht_y.sort_values("Type")
 
-            check = ht_y.groupby("Region")["Percentage"].sum().round(1)
-            if not all(check.between(99.0, 101.0)):
-                st.caption(f"Note: percentages do not sum to exactly 100 due to rounding: {check.to_dict()}")
+            if display_mode == "Absolute numbers":
+                metric_col = "Absolute"
+                value_label = "Households (count)"
+                text_tmpl = "%{text:,.0f}"
+                title_suffix = "absolute"
+            else:
+                metric_col = "Percentage"
+                value_label = "Share of households (%)"
+                text_tmpl = "%{text:.1f}%"
+                title_suffix = "percent"
+
+                check = ht_y.groupby("Region")["Percentage"].sum().round(1)
+                if not all(check.between(99.0, 101.0)):
+                    st.caption(f"Note: percentages do not sum to exactly 100 due to rounding: {check.to_dict()}")
 
             fig_type = px.bar(
                 ht_y,
                 x="Region",
-                y="Percentage",
+                y=metric_col,
                 color="Type",
                 barmode="stack",
-                text="Percentage",
-                labels={"Percentage": "Share of households (%)", "Region": "", "Type": "Housing type"},
-                title=f"Housing type — {year}",
+                text=metric_col,
+                labels={metric_col: value_label, "Region": "", "Type": "Housing type"},
+                title=f"Housing type — {year} ({title_suffix})",
                 category_orders={"Region": REGIONS, "Type": types},
             )
-            fig_type.update_traces(texttemplate="%{text:.1f}%", textposition="inside")
+            fig_type.update_traces(texttemplate=text_tmpl, textposition="inside")
             fig_type.update_layout(
                 height=520,
                 margin=dict(l=20, r=20, t=60, b=40),
                 legend_title_text="",
-                yaxis_range=[0, 100],
             )
+            if metric_col == "Percentage":
+                fig_type.update_yaxes(range=[0, 100])
+
             st.plotly_chart(fig_type, use_container_width=True, config={"displayModeBar": False})
 
             st.caption("NOTE: Caravan... is not visible on the graph due to it being <0.25% of the housing stock in both regions")
@@ -280,9 +291,9 @@ with right_col:
         occ_all = pd.read_csv(OCC_PATH)
 
         if "Absolute" in occ_all.columns:
-            _ensure_cols(occ_all, ["Year", "Region", "Occupancy", "Percentage", "Absolute"])
+            ensure_cols(occ_all, ["Year", "Region", "Occupancy", "Percentage", "Absolute"])
         else:
-            _ensure_cols(occ_all, ["Year", "Region", "Occupancy", "Percentage"])
+            ensure_cols(occ_all, ["Year", "Region", "Occupancy", "Percentage"])
 
         occ_all["Year"] = pd.to_numeric(occ_all["Year"], errors="coerce").astype(int)
         occ_all["Region"] = occ_all["Region"].astype(str).str.strip()
@@ -347,6 +358,3 @@ with right_col:
 
             st.plotly_chart(fig_occ, use_container_width=True, config={"displayModeBar": False})
 
-st.caption(
-    "display mode applies to occupancy where absolute counts exist. type remains percent-only by design. tenure is fixed (absolute bar + percent pies)."
-)

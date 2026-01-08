@@ -5,26 +5,25 @@ from typing import Final
 
 import pandas as pd
 
+from utils.cleaning import (
+    get_project_root,
+    find_raw_file,
+    STANDARD_REGION_MAP,
+    ROI_LABEL,
+    NI_LABEL,
+    ALL_LABEL,
+)
+
 #constants (edit if needed)
 RAW_SUBDIR: Final[str] = "data/raw/demographics"
 CLEAN_SUBDIR: Final[str] = "data/cleaned/demographics"
 
 RAW_FILE_PREFIX: Final[str] = "CPNI04"
-RAW_FILE_GLOB: Final[str] = f"{RAW_FILE_PREFIX}*.csv"
 RAW_FORCE_FILENAME: Final[str | None] = None
 
 CLEAN_FILENAME: Final[str] = "dependency_ratio_over_time.csv"
 
 POP_TIME_CLEAN_FILENAME: Final[str] = "population_over_time.csv"
-
-ROI_LABEL: Final[str] = "Republic of Ireland"
-NI_LABEL: Final[str] = "Northern Ireland"
-ALL_LABEL: Final[str] = "All-Island"
-
-REGION_MAP: Final[dict[str, str]] = {
-    "Ireland": ROI_LABEL,
-    "Northern Ireland": NI_LABEL,
-}
 
 #explicitly choose the intended series from the CPNI04 export
 FILTER_STATISTIC_LABEL: Final[str | None] = "Total dependency (All ages)"
@@ -39,7 +38,7 @@ PREFER_BOTH_SEXES: Final[bool] = True
 def normalise_census_year(y: object) -> int | None:
     """
     Normalise census year formats.
-    - "1936/1937" -> 1936
+    - "1936/1937" -> 1936 (uses FIRST year for historical data)
     - "1946" -> 1946
     """
     s = str(y).strip()
@@ -49,35 +48,7 @@ def normalise_census_year(y: object) -> int | None:
     return int(s) if s.isdigit() else None
 
 
-# ----------------------------
-# Project root detection
-# ----------------------------
-def get_project_root() -> Path:
-    here = Path(__file__).resolve()
-    for parent in [here.parent, *here.parents]:
-        if (parent / "pages").exists() and (parent / "data").exists():
-            return parent
-    return here.parents[1]
-
-
-def find_raw_file(raw_dir: Path) -> Path:
-    if RAW_FORCE_FILENAME:
-        forced = raw_dir / RAW_FORCE_FILENAME
-        if not forced.exists():
-            raise FileNotFoundError(f"Forced raw file not found: {forced}")
-        return forced
-
-    matches = list(raw_dir.glob(RAW_FILE_GLOB))
-    if not matches:
-        raise FileNotFoundError(
-            f"No raw file matching '{RAW_FILE_GLOB}' found in {raw_dir}. "
-            f"Put the downloaded CSV in {RAW_SUBDIR}/ (any filename starting with '{RAW_FILE_PREFIX}' is fine)."
-        )
-
-    return max(matches, key=lambda p: p.stat().st_mtime)
-
-
-# Load population weights
+#load population weights
 def load_population_over_time(clean_dir: Path) -> pd.DataFrame:
     path = clean_dir / POP_TIME_CLEAN_FILENAME
     if not path.exists():
@@ -193,7 +164,7 @@ def clean_dependency_ratio_over_time(raw_path: Path, pop_time: pd.DataFrame) -> 
     out = out.rename(columns=rename_map)
 
     out["Region"] = (
-        out["Region"].astype(str).str.strip().map(REGION_MAP).fillna(out["Region"].astype(str).str.strip())
+        out["Region"].astype(str).str.strip().map(STANDARD_REGION_MAP).fillna(out["Region"].astype(str).str.strip())
     )
 
     #year normalisation (handles "1936/1937" -> 1936)
@@ -270,7 +241,7 @@ def main() -> None:
     raw_dir.mkdir(parents=True, exist_ok=True)
     clean_dir.mkdir(parents=True, exist_ok=True)
 
-    raw_path = find_raw_file(raw_dir)
+    raw_path = find_raw_file(raw_dir, RAW_FILE_PREFIX, RAW_FORCE_FILENAME)
     pop_time = load_population_over_time(clean_dir)
 
     cleaned = clean_dependency_ratio_over_time(raw_path, pop_time)

@@ -5,65 +5,28 @@ from typing import Final
 
 import pandas as pd
 
+from utils.cleaning import (
+    get_project_root,
+    find_raw_file,
+    parse_census_year,
+    map_regions,
+    clean_string_column,
+    clean_numeric_column,
+    STANDARD_REGION_MAP,
+)
 
 #constants
 RAW_SUBDIR: Final[str] = "data/raw/economy"
 CLEAN_SUBDIR: Final[str] = "data/cleaned/economy"
 
 RAW_FILE_PREFIX: Final[str] = "CPNI53"
-RAW_FILE_GLOB: Final[str] = f"{RAW_FILE_PREFIX}*.csv"
 RAW_FORCE_FILENAME: Final[str | None] = None
 
 CLEAN_FILENAME: Final[str] = "cross_border_commuters.csv"
 
-REGION_MAP: Final[dict[str, str]] = {
-    "Ireland": "Republic of Ireland",
-    "Northern Ireland": "Northern Ireland",
-}
-
 FILTER_STATISTIC_CONTAINS: Final[str | None] = "cross border commuters for work"
 FILTER_SEX: Final[str] = "Both sexes"
 FILTER_UNIT: Final[str] = "Number"
-
-
-#project root detection
-def get_project_root() -> Path:
-    here = Path(__file__).resolve()
-    for parent in [here.parent, *here.parents]:
-        if (parent / "pages").exists() and (parent / "data").exists():
-            return parent
-    return here.parents[1]
-
-
-def find_raw_file(raw_dir: Path) -> Path:
-    if RAW_FORCE_FILENAME:
-        forced = raw_dir / RAW_FORCE_FILENAME
-        if not forced.exists():
-            raise FileNotFoundError(f"Forced raw file not found: {forced}")
-        return forced
-
-    matches = list(raw_dir.glob(RAW_FILE_GLOB))
-    if not matches:
-        raise FileNotFoundError(
-            f"No raw file matching '{RAW_FILE_GLOB}' found in {raw_dir}.\n"
-            f"Put the downloaded CSV in {RAW_SUBDIR}/ (any filename starting with '{RAW_FILE_PREFIX}' is fine)."
-        )
-
-    newest = max(matches, key=lambda p: p.stat().st_mtime)
-    return newest
-
-
-def _parse_year_to_int(census_year: str) -> int:
-    s = str(census_year).strip()
-    if "/" in s:
-        tail = s.split("/")[-1]
-        digits = "".join(ch for ch in tail if ch.isdigit())
-        if len(digits) == 4:
-            return int(digits)
-    digits = "".join(ch for ch in s if ch.isdigit())
-    if len(digits) == 4:
-        return int(digits)
-    raise ValueError(f"Could not parse Census Year '{census_year}' into a 4-digit year.")
 
 
 def clean_cross_border_commuters(raw_path: Path) -> pd.DataFrame:
@@ -87,12 +50,12 @@ def clean_cross_border_commuters(raw_path: Path) -> pd.DataFrame:
 
     out = df.copy()
 
-    out["Statistic Label"] = out["Statistic Label"].astype(str).str.strip()
-    out["Census Year"] = out["Census Year"].astype(str).str.strip()
-    out["Ireland and Northern Ireland"] = out["Ireland and Northern Ireland"].astype(str).str.strip()
-    out["Sex"] = out["Sex"].astype(str).str.strip()
-    out["Age Group"] = out["Age Group"].astype(str).str.strip()
-    out["UNIT"] = out["UNIT"].astype(str).str.strip()
+    out["Statistic Label"] = clean_string_column(out["Statistic Label"])
+    out["Census Year"] = clean_string_column(out["Census Year"])
+    out["Ireland and Northern Ireland"] = clean_string_column(out["Ireland and Northern Ireland"])
+    out["Sex"] = clean_string_column(out["Sex"])
+    out["Age Group"] = clean_string_column(out["Age Group"])
+    out["UNIT"] = clean_string_column(out["UNIT"])
 
     if FILTER_STATISTIC_CONTAINS is not None:
         out = out[out["Statistic Label"].str.contains(FILTER_STATISTIC_CONTAINS, case=False, na=False)]
@@ -108,15 +71,12 @@ def clean_cross_border_commuters(raw_path: Path) -> pd.DataFrame:
     if out.empty:
         raise ValueError("No rows remain after filtering to absolute numbers (UNIT='Number').")
 
-    out["VALUE"] = pd.to_numeric(out["VALUE"], errors="coerce")
+    out["VALUE"] = clean_numeric_column(out["VALUE"])
     out = out.dropna(subset=["VALUE"]).copy()
 
-    out["Region"] = out["Ireland and Northern Ireland"].map(REGION_MAP)
-    if out["Region"].isna().any():
-        unknown = sorted(out.loc[out["Region"].isna(), "Ireland and Northern Ireland"].unique())
-        raise ValueError(f"Unknown region labels encountered: {unknown}")
+    out = map_regions(out, "Ireland and Northern Ireland", "Region")
 
-    out["Year"] = out["Census Year"].apply(_parse_year_to_int).astype(int)
+    out["Year"] = out["Census Year"].apply(parse_census_year).astype(int)
     out = out.rename(columns={"Age Group": "Age group", "VALUE": "Persons"})
 
     out = out[["Year", "Region", "Age group", "Persons"]].copy()
@@ -136,7 +96,7 @@ def main() -> None:
     raw_dir.mkdir(parents=True, exist_ok=True)
     clean_dir.mkdir(parents=True, exist_ok=True)
 
-    raw_path = find_raw_file(raw_dir)
+    raw_path = find_raw_file(raw_dir, RAW_FILE_PREFIX, RAW_FORCE_FILENAME)
     cleaned = clean_cross_border_commuters(raw_path)
 
     out_path = clean_dir / CLEAN_FILENAME

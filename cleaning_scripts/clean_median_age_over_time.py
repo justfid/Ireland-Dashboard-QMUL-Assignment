@@ -11,56 +11,31 @@ from typing import Final
 
 import pandas as pd
 
+from utils.cleaning import (
+    get_project_root,
+    find_raw_file,
+    map_regions,
+    clean_string_column,
+    clean_numeric_column,
+    ROI_LABEL,
+    NI_LABEL,
+    ALL_LABEL,
+    STANDARD_REGION_MAP,
+)
 
 #constants
 RAW_SUBDIR: Final[str] = "data/raw/demographics"
 CLEAN_SUBDIR: Final[str] = "data/cleaned/demographics"
 
 RAW_FILE_PREFIX: Final[str] = "CPNI03"
-RAW_FILE_GLOB: Final[str] = f"{RAW_FILE_PREFIX}*.csv"
 RAW_FORCE_FILENAME: Final[str | None] = None
 
 CLEAN_FILENAME: Final[str] = "median_age_over_time.csv"
 
 POP_TIME_CLEAN_FILENAME: Final[str] = "population_over_time.csv"
 
-ROI_LABEL: Final[str] = "Republic of Ireland"
-NI_LABEL: Final[str] = "Northern Ireland"
-ALL_LABEL: Final[str] = "All-Island"
-
-REGION_MAP: Final[dict[str, str]] = {
-    "Ireland": ROI_LABEL,
-    "Northern Ireland": NI_LABEL,
-}
-
 FILTER_STATISTIC_LABEL: Final[str] = "Median Age"
 FILTER_UNIT: Final[str] = "Number"
-
-
-#project root detection
-
-def get_project_root() -> Path:
-    here = Path(__file__).resolve()
-    for parent in [here.parent, *here.parents]:
-        if (parent / "pages").exists() and (parent / "data").exists():
-            return parent
-    return here.parents[1]
-
-
-def find_raw_file(raw_dir: Path) -> Path:
-    if RAW_FORCE_FILENAME:
-        forced = raw_dir / RAW_FORCE_FILENAME
-        if not forced.exists():
-            raise FileNotFoundError(f"Forced raw file not found: {forced}")
-        return forced
-
-    matches = list(raw_dir.glob(RAW_FILE_GLOB))
-    if not matches:
-        raise FileNotFoundError(
-            f"No raw file matching '{RAW_FILE_GLOB}' found in {raw_dir}"
-        )
-
-    return max(matches, key=lambda p: p.stat().st_mtime)
 
 
 

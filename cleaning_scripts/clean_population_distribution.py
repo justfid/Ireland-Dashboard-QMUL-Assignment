@@ -12,24 +12,23 @@ from typing import Final
 
 import pandas as pd
 
-# Constants to edit
+from utils.cleaning import (
+    get_project_root,
+    find_raw_file,
+    STANDARD_REGION_MAP,
+    ROI_LABEL,
+    NI_LABEL,
+    ALL_LABEL,
+)
+
+#constants to edit
 RAW_SUBDIR: Final[str] = "data/raw/demographics"
 CLEAN_SUBDIR: Final[str] = "data/cleaned/demographics"
 
 RAW_FILE_PREFIX: Final[str] = "CPNI02"
-RAW_FILE_GLOB: Final[str] = f"{RAW_FILE_PREFIX}*.csv"
 RAW_FORCE_FILENAME: Final[str | None] = None  
 
 CLEAN_FILENAME: Final[str] = "population_distribution.csv"
-
-ROI_LABEL: Final[str] = "Republic of Ireland"
-NI_LABEL: Final[str] = "Northern Ireland"
-ALL_LABEL: Final[str] = "All-Island"
-
-REGION_MAP: Final[dict[str, str]] = {
-    "Ireland": ROI_LABEL,
-    "Northern Ireland": NI_LABEL,
-}
 
 #optional filters (set to None to disable)
 FILTER_STATISTIC_LABEL: Final[str | None] = "Population"
@@ -37,32 +36,6 @@ FILTER_UNIT: Final[str | None] = "Number"
 FILTER_SEX: Final[str | None] = None  # e.g. "Both sexes" if you want totals only
 
 ADD_ALL_ISLAND: Final[bool] = True
-
-
-#project root detection
-def get_project_root() -> Path:
-    here = Path(__file__).resolve()
-    for parent in [here.parent, *here.parents]:
-        if (parent / "pages").exists() and (parent / "data").exists():
-            return parent
-    return here.parents[1]
-
-
-def find_raw_file(raw_dir: Path) -> Path:
-    if RAW_FORCE_FILENAME:
-        forced = raw_dir / RAW_FORCE_FILENAME
-        if not forced.exists():
-            raise FileNotFoundError(f"Forced raw file not found: {forced}")
-        return forced
-
-    matches = list(raw_dir.glob(RAW_FILE_GLOB))
-    if not matches:
-        raise FileNotFoundError(
-            f"No raw file matching '{RAW_FILE_GLOB}' found in {raw_dir}. "
-            f"Put the downloaded CSV in {RAW_SUBDIR}/ (any filename starting with '{RAW_FILE_PREFIX}' is fine)."
-        )
-
-    return max(matches, key=lambda p: p.stat().st_mtime)
 
 
 #age band normalisation
@@ -149,7 +122,7 @@ def clean_population_distribution(raw_path: Path) -> pd.DataFrame:
         }
     )
 
-    out["Region"] = out["Region"].astype(str).str.strip().map(REGION_MAP).fillna(out["Region"].astype(str).str.strip())
+    out["Region"] = out["Region"].astype(str).str.strip().map(STANDARD_REGION_MAP).fillna(out["Region"].astype(str).str.strip())
     out["Sex"] = out["Sex"].astype(str).str.strip()
 
     out["Year"] = pd.to_numeric(out["Year"], errors="coerce").astype("Int64")
@@ -194,7 +167,7 @@ def main() -> None:
     raw_dir.mkdir(parents=True, exist_ok=True)
     clean_dir.mkdir(parents=True, exist_ok=True)
 
-    raw_path = find_raw_file(raw_dir)
+    raw_path = find_raw_file(raw_dir, RAW_FILE_PREFIX, RAW_FORCE_FILENAME)
     cleaned = clean_population_distribution(raw_path)
 
     out_path = clean_dir / CLEAN_FILENAME

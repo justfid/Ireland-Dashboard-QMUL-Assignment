@@ -8,65 +8,28 @@ from typing import Final
 
 import pandas as pd
 
+from utils.cleaning import (
+    get_project_root,
+    find_raw_file,
+    map_regions,
+    clean_string_column,
+    clean_numeric_column,
+    STANDARD_REGION_MAP,
+)
+
 #constants
 RAW_SUBDIR: Final[str] = "data/raw/demographics"
 CLEAN_SUBDIR: Final[str] = "data/cleaned/demographics"
 
-#accept any file starting with prefix (timestamped downloads are fine)
 RAW_FILE_PREFIX: Final[str] = "CPNI01"
-RAW_FILE_GLOB: Final[str] = f"{RAW_FILE_PREFIX}*.csv"
-
-#if you want to force a specific filename, set this to e.g. "CPNI01.csv"
 RAW_FORCE_FILENAME: Final[str | None] = None
 
 CLEAN_FILENAME: Final[str] = "population_over_time.csv"
-
-REGION_MAP: Final[dict[str, str]] = {
-    "Ireland": "Republic of Ireland",
-    "Northern Ireland": "Northern Ireland",
-}
 
 #optional filters: set to None to disable filtering
 FILTER_STATISTIC_LABEL: Final[str | None] = "Population"
 FILTER_SEX: Final[str | None] = "Both sexes"
 FILTER_UNIT: Final[str | None] = "Number"
-
-
-#project root detection 
-
-def get_project_root() -> Path:
-    """
-    Find the project root by searching upward for a directory that contains
-    both 'pages' and 'data'. This works no matter where you run the script from.
-    """
-    here = Path(__file__).resolve()
-    for parent in [here.parent, *here.parents]:
-        if (parent / "pages").exists() and (parent / "data").exists():
-            return parent
-    return here.parents[1]
-
-
-def find_raw_file(raw_dir: Path) -> Path:
-    """
-    Pick the raw file to clean.
-    - If RAW_FORCE_FILENAME is set and exists, use it.
-    - Else pick the newest file matching RAW_FILE_GLOB (e.g. CPNI01*.csv).
-    """
-    if RAW_FORCE_FILENAME:
-        forced = raw_dir / RAW_FORCE_FILENAME
-        if not forced.exists():
-            raise FileNotFoundError(f"Forced raw file not found: {forced}")
-        return forced
-
-    matches = list(raw_dir.glob(RAW_FILE_GLOB))
-    if not matches:
-        raise FileNotFoundError(
-            f"No raw file matching '{RAW_FILE_GLOB}' found in {raw_dir}.\n"
-            f"Put the downloaded CSV in {RAW_SUBDIR}/ (any filename starting with '{RAW_FILE_PREFIX}' is fine)."
-        )
-
-    newest = max(matches, key=lambda p: p.stat().st_mtime)
-    return newest
 
 
 def clean_population_over_time(raw_path: Path) -> pd.DataFrame:

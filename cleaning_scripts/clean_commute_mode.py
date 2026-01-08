@@ -1,10 +1,18 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterable, List
+from typing import List
 
 import pandas as pd
 
+from utils.cleaning import (
+    ensure_cols,
+    latest_timestamped_file,
+    parse_census_year,
+    map_regions,
+    clean_string_column,
+    clean_numeric_column,
+)
 
 #constants
 RAW_DIR = Path("data/raw/economy")
@@ -19,36 +27,9 @@ REQUIRED_COLS: List[str] = [
     "Ireland and Northern Ireland",
     "Means of Travel",
     "UNIT",
-    "VALUE",
 ]
 
 DROP_MODES = {"All means of travel"}
-
-
-def _ensure_cols(df: pd.DataFrame, cols: Iterable[str]) -> None:
-    missing = [c for c in cols if c not in df.columns]
-    if missing:
-        raise ValueError(f"Missing expected columns: {missing}. Got: {list(df.columns)}")
-
-
-def _latest_timestamped_file(raw_dir: Path, prefix: str) -> Path:
-    candidates = sorted(raw_dir.glob(f"{prefix}*.csv"))
-    if not candidates:
-        raise FileNotFoundError(f"No matching files found in {raw_dir} for pattern {prefix}*.csv")
-    return candidates[-1]
-
-
-def _parse_year_to_int(census_year: str) -> int:
-    s = str(census_year).strip()
-    if "/" in s:
-        tail = s.split("/")[-1]
-        digits = "".join(ch for ch in tail if ch.isdigit())
-        if len(digits) == 4:
-            return int(digits)
-    digits = "".join(ch for ch in s if ch.isdigit())
-    if len(digits) == 4:
-        return int(digits)
-    raise ValueError(f"Could not parse Census Year '{census_year}' into a 4-digit year.")
 
 
 def clean_commute_mode(raw_path: Path) -> pd.DataFrame:
@@ -108,7 +89,7 @@ def clean_commute_mode(raw_path: Path) -> pd.DataFrame:
 def main() -> None:
     CLEAN_DIR.mkdir(parents=True, exist_ok=True)
 
-    raw_path = _latest_timestamped_file(RAW_DIR, TABLE_PREFIX)
+    raw_path = latest_timestamped_file(RAW_DIR, TABLE_PREFIX)
     cleaned = clean_commute_mode(raw_path)
 
     cleaned.to_csv(OUT_PATH, index=False)

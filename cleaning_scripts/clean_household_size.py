@@ -1,10 +1,14 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterable
 
 import pandas as pd
 
+from utils.cleaning import (
+    latest_timestamped_file,
+    parse_census_year,
+    STANDARD_REGION_MAP,
+)
 
 #constants
 RAW_DIR = Path("data/raw/housing_education")
@@ -13,11 +17,6 @@ CLEAN_DIR = Path("data/cleaned/housing_education")
 TABLE_PREFIX = "CPNI11"
 OUT_PATH = CLEAN_DIR / "household_size.csv"
 
-REGION_MAP = {
-    "Ireland": "Republic of Ireland",
-    "Northern Ireland": "Northern Ireland",
-}
-
 HOUSEHOLD_SIZE_MAP = {
     "Households - 1 person household": "1",
     "Households - 2 person household": "2",
@@ -25,31 +24,6 @@ HOUSEHOLD_SIZE_MAP = {
     "Households - 4 person household": "4",
     "Households - 5 or more person household": "5+",
 }
-
-
-def _latest_timestamped_file(raw_dir: Path, prefix: str) -> Path:
-    """
-    Picks the latest file like: <prefix>.<YYYYMMDDThhmmss>.csv
-    Falls back to newest mtime among prefix-matching csvs.
-    """
-    candidates = sorted(raw_dir.glob(f"{prefix}*.csv"))
-    if not candidates:
-        raise FileNotFoundError(f"No raw files found in {raw_dir} matching {prefix}*.csv")
-
-    def _stamp(p: Path) -> str:
-        #prefer embedded timestamp if present, else mtime key
-        return p.name
-
-    #try lexicographic (works for timestamped names), else mtime
-    best = max(candidates, key=lambda p: (_stamp(p), p.stat().st_mtime))
-    return best
-
-
-def _parse_census_year(s: str) -> int:
-    #expects e.g. "2001/2002" -> 2002
-    parts = str(s).split("/")
-    last = parts[-1]
-    return int(last)
 
 
 def clean_household_size(raw_path: Path) -> pd.DataFrame:
@@ -67,16 +41,15 @@ def clean_household_size(raw_path: Path) -> pd.DataFrame:
     if missing:
         raise ValueError(f"Missing expected columns: {sorted(missing)}")
 
-    #drop total row 
     df = df[df["Household Size"] != "All private households"].copy()
 
     #map + select
-    df["region"] = df["Ireland and Northern Ireland"].map(REGION_MAP)
+    df["region"] = df["Ireland and Northern Ireland"].map(STANDARD_REGION_MAP)
     if df["region"].isna().any():
         bad = sorted(df.loc[df["region"].isna(), "Ireland and Northern Ireland"].unique().tolist())
         raise ValueError(f"Unmapped region labels: {bad}")
 
-    df["censusyear"] = df["Census Year"].map(_parse_census_year).astype(int)
+    df["censusyear"] = df["Census Year"].map(parse_census_year).astype(int)
 
     df["household_size"] = df["Household Size"].map(HOUSEHOLD_SIZE_MAP)
     if df["household_size"].isna().any():
@@ -134,7 +107,7 @@ def clean_household_size(raw_path: Path) -> pd.DataFrame:
 def main() -> None:
     CLEAN_DIR.mkdir(parents=True, exist_ok=True)
 
-    raw_path = _latest_timestamped_file(RAW_DIR, TABLE_PREFIX)
+    raw_path = latest_timestamped_file(RAW_DIR, TABLE_PREFIX)
     cleaned = clean_household_size(raw_path)
 
     cleaned.to_csv(OUT_PATH, index=False)

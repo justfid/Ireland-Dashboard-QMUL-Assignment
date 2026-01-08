@@ -108,16 +108,11 @@ def clean_median_age_over_time(
         }
     )
 
-    out["Region"] = (
-        out["Region"]
-        .astype(str)
-        .str.strip()
-        .map(REGION_MAP)
-        .fillna(out["Region"].astype(str).str.strip())
-    )
+    out["Region"] = clean_string_column(out["Region"])
+    out = map_regions(out, "Region", "Region")
 
     out["Year"] = pd.to_numeric(out["Year"], errors="coerce").astype(int)
-    out["Median age"] = pd.to_numeric(out["Median age"], errors="coerce")
+    out["Median age"] = clean_numeric_column(out["Median age"])
 
     out = out.dropna(subset=["Year", "Median age"])
     out = out[out["Region"].isin([ROI_LABEL, NI_LABEL])]

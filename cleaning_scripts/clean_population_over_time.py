@@ -82,16 +82,17 @@ def clean_population_over_time(raw_path: Path) -> pd.DataFrame:
         }
     )
 
-    out["Region"] = out["Region"].astype(str).str.strip().map(REGION_MAP).fillna(out["Region"])
+    out["Region"] = clean_string_column(out["Region"])
+    out = map_regions(out, "Region", "Region")
     out["Year"] = pd.to_numeric(out["Year"], errors="coerce").astype("Int64")
-    out["Population"] = pd.to_numeric(out["Population"], errors="coerce").astype("Int64")
+    out["Population"] = clean_numeric_column(out["Population"]).astype("Int64")
 
     out = out.dropna(subset=["Year", "Population"]).copy()
     out["Year"] = out["Year"].astype(int)
     out["Population"] = out["Population"].astype(int)
 
     #keep only ROI and NI rows
-    out = out[out["Region"].isin(REGION_MAP.values())]
+    out = out[out["Region"].isin(STANDARD_REGION_MAP.values())]
     out = out.sort_values(["Region", "Year"]).reset_index(drop=True)
 
     #ensure 1 row per (Region, Year)

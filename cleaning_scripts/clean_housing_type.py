@@ -52,23 +52,20 @@ def _normalise_type(label: str) -> str:
 
 def clean_housing_type(raw_path: Path) -> pd.DataFrame:
     df = pd.read_csv(raw_path)
-    _ensure_cols(df, REQUIRED_COLS)
+    ensure_cols(df, REQUIRED_COLS)
 
-    df["Statistic Label"] = df["Statistic Label"].astype(str).str.strip()
-    df["Census Year"] = df["Census Year"].astype(str).str.strip()
-    df["Ireland and Northern Ireland"] = df["Ireland and Northern Ireland"].astype(str).str.strip()
-    df["Type of Household"] = df["Type of Household"].astype(str).str.strip()
-    df["UNIT"] = df["UNIT"].astype(str).str.strip()
+    df["Statistic Label"] = clean_string_column(df["Statistic Label"])
+    df["Census Year"] = clean_string_column(df["Census Year"])
+    df["Ireland and Northern Ireland"] = clean_string_column(df["Ireland and Northern Ireland"])
+    df["Type of Household"] = clean_string_column(df["Type of Household"])
+    df["UNIT"] = clean_string_column(df["UNIT"])
 
-    df["VALUE"] = pd.to_numeric(df["VALUE"], errors="coerce")
+    df["VALUE"] = clean_numeric_column(df["VALUE"])
     df = df.dropna(subset=["VALUE"]).copy()
 
-    df["Region"] = df["Ireland and Northern Ireland"].map(REGION_MAP)
-    if df["Region"].isna().any():
-        unknown = sorted(df.loc[df["Region"].isna(), "Ireland and Northern Ireland"].unique())
-        raise ValueError(f"Unknown region labels encountered: {unknown}")
+    df = map_regions(df, "Ireland and Northern Ireland", "Region")
 
-    df["Year"] = df["Census Year"].apply(_parse_year_to_int).astype(int)
+    df["Year"] = df["Census Year"].apply(parse_census_year).astype(int)
     df = df.rename(columns={"Type of Household": "Type"})
 
     #drop totals and zero-information categories

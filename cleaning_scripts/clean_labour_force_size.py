@@ -34,23 +34,23 @@ REQUIRED_COLS: List[str] = [
 
 def clean_labour_market_snapshot(raw_path: Path) -> pd.DataFrame:
     df = pd.read_csv(raw_path)
-    _ensure_cols(df, REQUIRED_COLS)
+    ensure_cols(df, REQUIRED_COLS)
 
-    df["Statistic Label"] = df["Statistic Label"].astype(str).str.strip()
-    df["Census Year"] = df["Census Year"].astype(str).str.strip()
-    df["Ireland and Northern Ireland"] = df["Ireland and Northern Ireland"].astype(str).str.strip()
-    df["Sex"] = df["Sex"].astype(str).str.strip()
-    df["Principal Economic Status"] = df["Principal Economic Status"].astype(str).str.strip()
-    df["UNIT"] = df["UNIT"].astype(str).str.strip()
-    df["VALUE"] = pd.to_numeric(df["VALUE"], errors="coerce")
+    df["Statistic Label"] = clean_string_column(df["Statistic Label"])
+    df["Census Year"] = clean_string_column(df["Census Year"])
+    df["Ireland and Northern Ireland"] = clean_string_column(df["Ireland and Northern Ireland"])
+    df["Sex"] = clean_string_column(df["Sex"])
+    df["Principal Economic Status"] = clean_string_column(df["Principal Economic Status"])
+    df["UNIT"] = clean_string_column(df["UNIT"])
+    df["VALUE"] = clean_numeric_column(df["VALUE"])
 
     df = df.dropna(subset=["VALUE"])
 
     #keep only ROI/NI and standardise naming
-    df["Region"] = _map_region(df["Ireland and Northern Ireland"])
+    df = map_regions(df, "Ireland and Northern Ireland", "Region")
 
     #align year
-    df["Year"] = df["Census Year"].apply(_parse_year_to_int).astype(int)
+    df["Year"] = df["Census Year"].apply(parse_census_year).astype(int)
 
     #we want the 16+ usual resident base (numbers) and its percentage form
     #statistic labels differ, so filter by contains rather than exact match

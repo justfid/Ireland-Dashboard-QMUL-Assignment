@@ -27,6 +27,7 @@ REQUIRED_COLS: List[str] = [
     "Ireland and Northern Ireland",
     "Means of Travel",
     "UNIT",
+    "VALUE",
 ]
 
 DROP_MODES = {"All means of travel"}
@@ -34,27 +35,20 @@ DROP_MODES = {"All means of travel"}
 
 def clean_commute_mode(raw_path: Path) -> pd.DataFrame:
     df = pd.read_csv(raw_path)
-    _ensure_cols(df, REQUIRED_COLS)
+    ensure_cols(df, REQUIRED_COLS)
 
-    df["Statistic Label"] = df["Statistic Label"].astype(str).str.strip()
-    df["Census Year"] = df["Census Year"].astype(str).str.strip()
-    df["Ireland and Northern Ireland"] = df["Ireland and Northern Ireland"].astype(str).str.strip()
-    df["Means of Travel"] = df["Means of Travel"].astype(str).str.strip()
-    df["UNIT"] = df["UNIT"].astype(str).str.strip()
+    df["Statistic Label"] = clean_string_column(df["Statistic Label"])
+    df["Census Year"] = clean_string_column(df["Census Year"])
+    df["Ireland and Northern Ireland"] = clean_string_column(df["Ireland and Northern Ireland"])
+    df["Means of Travel"] = clean_string_column(df["Means of Travel"])
+    df["UNIT"] = clean_string_column(df["UNIT"])
 
-    df["VALUE"] = pd.to_numeric(df["VALUE"], errors="coerce")
+    df["VALUE"] = clean_numeric_column(df["VALUE"])
     df = df.dropna(subset=["VALUE"]).copy()
 
-    region_map = {
-        "Ireland": "Republic of Ireland",
-        "Northern Ireland": "Northern Ireland",
-    }
-    df["Region"] = df["Ireland and Northern Ireland"].map(region_map)
-    if df["Region"].isna().any():
-        unknown = sorted(df.loc[df["Region"].isna(), "Ireland and Northern Ireland"].unique())
-        raise ValueError(f"Unknown region labels encountered: {unknown}")
+    df = map_regions(df, "Ireland and Northern Ireland", "Region")
 
-    df["Year"] = df["Census Year"].apply(_parse_year_to_int).astype(int)
+    df["Year"] = df["Census Year"].apply(parse_census_year).astype(int)
     df = df.rename(columns={"Means of Travel": "Mode"})
 
     if DROP_MODES:

@@ -58,16 +58,10 @@ def clean_unemployment_ilo(raw_path: Path) -> pd.DataFrame:
         raise ValueError(f"Unexpected UNIT values: {bad_units}. Expected only '%'.")
 
     #map region names to dashboard standard
-        "Ireland": "Republic of Ireland",
-        "Northern Ireland": "Northern Ireland",
-    }
-    df["Region"] = df["Ireland and Northern Ireland"].map(region_map)
-    if df["Region"].isna().any():
-        unknown = sorted(df.loc[df["Region"].isna(), "Ireland and Northern Ireland"].unique())
-        raise ValueError(f"Unknown region labels encountered: {unknown}")
+    df = map_regions(df, "Ireland and Northern Ireland", "Region")
 
     #derive year int
-    df["Year"] = df["Census Year"].apply(_parse_year_to_int).astype(int)
+    df["Year"] = df["Census Year"].apply(parse_census_year).astype(int)
 
     out = df[["Year", "Region", "Sex", "VALUE"]].rename(columns={"VALUE": "Unemployment rate"}).copy()
 

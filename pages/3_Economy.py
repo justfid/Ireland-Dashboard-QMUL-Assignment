@@ -25,8 +25,6 @@ UNEMP_PATH = CLEAN_DIR / "unemployment_rate.csv"
 LABOUR_PATH = CLEAN_DIR / "labour_market_snapshot.csv"
 SECTOR_PATH = CLEAN_DIR / "employment_by_sector.csv"
 COMMUTE_PATH = CLEAN_DIR / "commute_mode.csv"
-GDP_PATH = CLEAN_DIR / "gdp_over_time.csv"
-
 
 #loaders
 
@@ -103,30 +101,6 @@ def load_commute_modes(path: Path) -> pd.DataFrame:
 
     df = df[df["Region"].isin(REGIONS)]
     return df.sort_values(["Year", "Region", "Mode"]).reset_index(drop=True)
-
-
-@st.cache_data(show_spinner=False)
-def load_gdp(path: Path) -> pd.DataFrame:
-    df = pd.read_csv(path)
-    ensure_cols(df, ["Year", "Region", "GDP"])
-
-    df["Year"] = pd.to_numeric(df["Year"], errors="coerce").astype(int)
-    df["GDP"] = pd.to_numeric(df["GDP"], errors="coerce")
-    df["Region"] = df["Region"].astype(str).str.strip()
-
-    df = df[df["Region"].isin(REGIONS)]
-    return df.sort_values(["Region", "Year"]).reset_index(drop=True)
-
-
-def _weighted_rate(values: pd.Series, weights: pd.Series) -> float:
-    w = pd.to_numeric(weights, errors="coerce")
-    v = pd.to_numeric(values, errors="coerce")
-    if w.isna().any() or v.isna().any():
-        return float("nan")
-    total_w = float(w.sum())
-    if total_w <= 0:
-        return float("nan")
-    return float((v * w).sum() / total_w)
 
 
 #page header
@@ -482,19 +456,3 @@ else:
     st.info("Cross-border commuting data not yet integrated. Run the CPNI53 cleaning script to generate the cleaned CSV.")
 
 
-#GDP
-
-st.header("Economic output (GDP)")
-
-st.markdown(
-    """
-Gross Domestic Product (GDP) is a widely used indicator of economic scale and was considered for inclusion in the Economy section.
-
-However, GDP data for the Republic of Ireland and Northern Ireland are compiled under different national accounting frameworks and are not directly comparable over time or across jurisdictions.
-In addition, GDP figures for the Republic of Ireland are known to be significantly affected by multinational profit-shifting, limiting their usefulness as indicators of underlying domestic economic conditions.
-
-For these reasons, GDP is not used as an analytical variable in the Economy section, which instead focuses on census-based labour market and commuting indicators where population coverage and cross-jurisdictional comparability can be more clearly defined.
-
-A single-year GDP figure is shown in the Overview page to provide high-level contextual information.
-"""
-)

@@ -387,7 +387,7 @@ else:
             margin=dict(l=20, r=20, t=60, b=60),
             legend_title_text="",
         )
-        st.plotly_chart(fig_lang, use_container_width=True, config={"displayModeBar": False})
+        st.plotly_chart(fig_lang, width="stretch", config={"displayModeBar": False})
         
         st.caption(f"Population aged 3 years and over who speak these languages as their main language — {year}.")
 
@@ -443,7 +443,7 @@ else:
                 display_df_roi["Percentage"] = display_df_roi["Percentage"].apply(lambda x: f"{x:.2f}%")
                 display_df_roi = display_df_roi.rename(columns={"Country": "Place of Birth", "Percentage": "Share (%)"})
             
-            st.dataframe(display_df_roi, hide_index=True, use_container_width=True, height=CHART_HEIGHT_TABLE)
+            st.dataframe(display_df_roi, hide_index=True, width="stretch", height=CHART_HEIGHT_TABLE)
         
         with col2:
             st.subheader(f"{NI}")
@@ -456,7 +456,7 @@ else:
                 display_df_ni["Percentage"] = display_df_ni["Percentage"].apply(lambda x: f"{x:.2f}%")
                 display_df_ni = display_df_ni.rename(columns={"Country": "Place of Birth", "Percentage": "Share (%)"})
             
-            st.dataframe(display_df_ni, hide_index=True, use_container_width=True, height=CHART_HEIGHT_TABLE)
+            st.dataframe(display_df_ni, hide_index=True, width="stretch", height=CHART_HEIGHT_TABLE)
         
         st.caption(f"Top places of birth for residents — {year}.")
 
@@ -530,7 +530,7 @@ else:
             margin=dict(l=20, r=20, t=60, b=60),
             legend_title_text="",
         )
-        st.plotly_chart(fig_mar_time, use_container_width=True, config={"displayModeBar": False})
+        st.plotly_chart(fig_mar_time, width="stretch", config={"displayModeBar": False})
         
         st.caption("Census years: 2002 (2001/2002), 2011, 2022 (2021/2022). Latter year shown for cross-border census periods.")
         
@@ -558,7 +558,7 @@ else:
                     margin=dict(l=20, r=20, t=60, b=20),
                     showlegend=False,
                 )
-                st.plotly_chart(fig_roi, use_container_width=True, config={"displayModeBar": False})
+                st.plotly_chart(fig_roi, width="stretch", config={"displayModeBar": False})
         
         with col2:
             mar_ni = mar_latest[mar_latest["Region"] == NI].copy()
@@ -576,6 +576,6 @@ else:
                     margin=dict(l=20, r=20, t=60, b=20),
                     showlegend=False,
                 )
-                st.plotly_chart(fig_ni, use_container_width=True, config={"displayModeBar": False})
+                st.plotly_chart(fig_ni, width="stretch", config={"displayModeBar": False})
         
         st.caption(f"Marital status distribution for {sex_selection.lower()} aged 15 years and over.")

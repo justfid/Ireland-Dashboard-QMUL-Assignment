@@ -460,7 +460,7 @@ classification_df = pd.DataFrame(classification_data)
 st.dataframe(
     classification_df,
     hide_index=True,
-    use_container_width=True,
+    width = "stretch",
 )
 
 st.caption("NFQ = National Framework of Qualifications (ROI) | NVQ = National Vocational Qualification (NI)")

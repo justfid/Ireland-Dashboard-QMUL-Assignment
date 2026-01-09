@@ -52,7 +52,7 @@ def _toggle_view() -> None:
 
 @st.cache_data(show_spinner=False)
 def _load_latest_census_populations() -> dict:
-    #uses the authoritative cleaned demographics file (census years only)
+    #uses the cleaned demographics file
     path = "data/cleaned/demographics/population_over_time.csv"
     df = pd.read_csv(path)
 

@@ -104,6 +104,14 @@ def clean_population_over_time(raw_path: Path) -> pd.DataFrame:
     if out.duplicated(subset=["Region", "Year"]).any():
         out = out.drop_duplicates(subset=["Region", "Year"], keep="last")
 
+    #calculate All-Island totals
+    all_island = out.groupby("Year", as_index=False)["Population"].sum()
+    all_island["Region"] = "All-Island"
+
+    #combine with ROI and NI data
+    out = pd.concat([out, all_island], ignore_index=True)
+    out = out.sort_values(["Region", "Year"]).reset_index(drop=True)
+
     cleaned = out[["Year", "Region", "Population"]].reset_index(drop=True)
     return cleaned
 

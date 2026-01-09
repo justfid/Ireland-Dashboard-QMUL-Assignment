@@ -170,7 +170,9 @@ with st.sidebar:
         "Regions (trend charts)",
         REGIONS,
         default=REGIONS,
+        help="Select any combination of regions to display in the charts"
     )
+    st.caption("Note: This filter does not apply to the population structure section below.")
 
     year_min, year_max = int(pop_time["Year"].min()), int(pop_time["Year"].max())
     year_range: Tuple[int, int] = st.slider(
@@ -241,6 +243,8 @@ fig.update_yaxes(tickformat="~s")
 st.plotly_chart(fig, width="stretch")
 
 growth = make_growth_between_census(pop_f)
+
+st.subheader("Population change between census years")
 metric_mode = st.radio(
     "Growth metric",
     ["% change", "Absolute change"],

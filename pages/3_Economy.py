@@ -158,6 +158,7 @@ with st.sidebar:
         horizontal=True,
         key="labour_display_mode",
     )
+    st.caption("Note: This setting does not affect the unemployment rate graph.")
 
 #labour market
 st.header("Labour market")
@@ -230,6 +231,8 @@ else:
         #right column
         with right:
             st.subheader(f"ILO unemployment rate — {year}")
+            
+            log_scale = st.checkbox("Logarithmic scale", value=False, key="unemp_log")
 
             fig_sex = px.bar(
                 unemp,
@@ -240,14 +243,20 @@ else:
                 text="Unemployment rate",
                 labels={"Unemployment rate": "ILO unemployment rate (%)"},
                 category_orders={"Sex": sex_order, "Region": [ROI, NI]},
+                log_y=log_scale,
             )
             fig_sex.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
-            fig_sex.update_layout(
-                height=340,
-                yaxis_range=[0, 6],
-                margin=dict(l=40, r=20, t=40, b=40),
-                legend_title_text="",
-            )
+            
+            layout_kwargs = {
+                "height": 420 if log_scale else 340,
+                "margin": dict(l=40, r=20, t=40, b=40),
+                "legend_title_text": "",
+            }
+            
+            if not log_scale:
+                layout_kwargs["yaxis_range"] = [0, 6]
+            
+            fig_sex.update_layout(**layout_kwargs)
             st.plotly_chart(fig_sex, width="stretch", config={"displayModeBar": False})
 
 
@@ -270,6 +279,8 @@ if SECTOR_PATH.exists():
     sector_y["_nace"] = sector_y["Sector"].str.extract(r"\(([A-Z])\)")
     sector_y = sector_y.sort_values(["_nace", "Sector"])
 
+    log_sector = st.checkbox("Logarithmic scale", value=False, key="sector_log")
+
     fig_sector = px.bar(
         sector_y,
         x=metric_col,
@@ -281,6 +292,7 @@ if SECTOR_PATH.exists():
         labels={metric_col: value_label, "Sector": "Industry"},
         category_orders={"Sector": sector_y["Sector"].unique(), "Region": REGIONS},
         title="Persons in employment by industrial sector",
+        log_x=log_sector,
     )
     fig_sector.update_traces(texttemplate=text_tmpl, textposition="outside")
     fig_sector.update_layout(
@@ -318,6 +330,8 @@ if COMMUTE_PATH.exists():
     commute_y["Mode"] = pd.Categorical(commute_y["Mode"], categories=modes, ordered=True)
     commute_y = commute_y.sort_values("Mode")
 
+    log_commute = st.checkbox("Logarithmic scale", value=False, key="commute_log")
+
     fig_commute = px.bar(
         commute_y,
         x="Mode",
@@ -328,6 +342,7 @@ if COMMUTE_PATH.exists():
         labels={metric_col: value_label, "Mode": "Transport mode"},
         category_orders={"Mode": modes, "Region": REGIONS},
         title="Mode of transport to work",
+        log_y=log_commute,
     )
     fig_commute.update_traces(texttemplate=text_tmpl, textposition="outside")
     fig_commute.update_layout(
@@ -438,6 +453,8 @@ if CROSS_PATH.exists():
         cross_y["Age group"] = pd.Categorical(cross_y["Age group"], categories=ages_order, ordered=True)
         cross_y = cross_y.sort_values("Age group")
 
+        log_cross = st.checkbox("Logarithmic scale", value=False, key="cross_log")
+
         fig_cross = px.bar(
             cross_y,
             x="Age group",
@@ -448,6 +465,7 @@ if CROSS_PATH.exists():
             labels={"Persons": "Cross-border commuters (persons)", "Age group": "Age group"},
             category_orders={"Age group": ages_order, "Region": REGIONS},
             title=f"Cross-border commuters for work — {cross_year}",
+            log_y=log_cross,
         )
         fig_cross.update_traces(texttemplate="%{text:,.0f}", textposition="outside")
         fig_cross.update_layout(

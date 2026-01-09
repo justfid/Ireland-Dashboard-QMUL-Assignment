@@ -1,0 +1,91 @@
+Year,Sex,Status,Region,Absolute,Percentage
+2002,Both sexes,Divorced,Northern Ireland,53000,4.032534181
+2002,Both sexes,Divorced,Republic of Ireland,35059,1.134678091
+2002,Both sexes,Married,Northern Ireland,658083,50.07060739
+2002,Both sexes,Married,Republic of Ireland,1454413,47.07180944
+2002,Both sexes,Separated,Northern Ireland,49419,3.760071825
+2002,Both sexes,Separated,Republic of Ireland,98779,3.19696418
+2002,Both sexes,Single,Northern Ireland,453320,34.49110179
+2002,Both sexes,Single,Republic of Ireland,1314664,42.54885874
+2002,Both sexes,Widowed,Northern Ireland,100488,7.645684808
+2002,Both sexes,Widowed,Republic of Ireland,186860,6.047689557
+2002,Female,Divorced,Northern Ireland,31091,4.550557275
+2002,Female,Divorced,Republic of Ireland,18904,1.205877569
+2002,Female,Married,Northern Ireland,329161,48.1768352
+2002,Female,Married,Republic of Ireland,726069,46.31561153
+2002,Female,Separated,Northern Ireland,30031,4.395412998
+2002,Female,Separated,Republic of Ireland,57359,3.658904542
+2002,Female,Single,Northern Ireland,213331,31.22366389
+2002,Female,Single,Republic of Ireland,616073,39.29901668
+2002,Female,Widowed,Northern Ireland,79621,11.65353063
+2002,Female,Widowed,Republic of Ireland,149250,9.520589671
+2002,Male,Divorced,Northern Ireland,21909,3.471695123
+2002,Male,Divorced,Republic of Ireland,16155,1.061348645
+2002,Male,Married,Northern Ireland,328922,52.12090481
+2002,Male,Married,Republic of Ireland,728344,47.85062939
+2002,Male,Separated,Northern Ireland,19388,3.072218041
+2002,Male,Separated,Republic of Ireland,41420,2.721204636
+2002,Male,Single,Northern Ireland,239989,38.02860199
+2002,Male,Single,Republic of Ireland,698591,45.89592148
+2002,Male,Widowed,Northern Ireland,20867,3.306580042
+2002,Male,Widowed,Republic of Ireland,37610,2.470895856
+2011,Both sexes,Divorced,Northern Ireland,78074,5.361636084
+2011,Both sexes,Divorced,Republic of Ireland,87770,2.432203404
+2011,Both sexes,Married,Northern Ireland,682074,46.84059444
+2011,Both sexes,Married,Republic of Ireland,1708604,47.34729936
+2011,Both sexes,Separated,Northern Ireland,56911,3.908293045
+2011,Both sexes,Separated,Republic of Ireland,116194,3.219863761
+2011,Both sexes,Single,Northern Ireland,542013,37.22207724
+2011,Both sexes,Single,Republic of Ireland,1505035,41.70617808
+2011,Both sexes,Widowed,Northern Ireland,97088,6.667399187
+2011,Both sexes,Widowed,Republic of Ireland,191059,5.294455396
+2011,Female,Divorced,Northern Ireland,45235,6.027282999
+2011,Female,Divorced,Republic of Ireland,49685,2.704457769
+2011,Female,Married,Northern Ireland,339963,45.29795977
+2011,Female,Married,Republic of Ireland,853517,46.45870347
+2011,Female,Separated,Northern Ireland,34093,4.542680652
+2011,Female,Separated,Republic of Ireland,65361,3.557735016
+2011,Female,Single,Northern Ireland,256212,34.13865882
+2011,Female,Single,Republic of Ireland,720612,39.22440821
+2011,Female,Widowed,Northern Ireland,75001,9.993417757
+2011,Female,Widowed,Republic of Ireland,147977,8.054695529
+2011,Male,Divorced,Northern Ireland,32839,4.653683948
+2011,Male,Divorced,Republic of Ireland,38085,2.149860853
+2011,Male,Married,Northern Ireland,342111,48.48127133
+2011,Male,Married,Republic of Ireland,855087,48.26882151
+2011,Male,Separated,Northern Ireland,22818,3.233586904
+2011,Male,Separated,Republic of Ireland,50833,2.869472936
+2011,Male,Single,Northern Ireland,285801,40.50146247
+2011,Male,Single,Republic of Ireland,784423,44.2799081
+2011,Male,Widowed,Northern Ireland,22087,3.129995352
+2011,Male,Widowed,Republic of Ireland,43082,2.431936596
+2022,Both sexes,Divorced,Northern Ireland,91130,5.925377822
+2022,Both sexes,Divorced,Republic of Ireland,133420,3.22515768
+2022,Both sexes,Married,Northern Ireland,693250,45.07591545
+2022,Both sexes,Married,Republic of Ireland,1912850,46.23926599
+2022,Both sexes,Separated,Northern Ireland,57272,3.723891568
+2022,Both sexes,Separated,Republic of Ireland,119452,2.887509633
+2022,Both sexes,Single,Northern Ireland,599925,39.00781619
+2022,Both sexes,Single,Republic of Ireland,1761047,42.5697366
+2022,Both sexes,Widowed,Northern Ireland,96384,6.266998968
+2022,Both sexes,Widowed,Republic of Ireland,210083,5.078330093
+2022,Female,Divorced,Northern Ireland,53478,6.778642674
+2022,Female,Divorced,Republic of Ireland,78497,3.719716912
+2022,Female,Married,Northern Ireland,346032,43.86153712
+2022,Female,Married,Republic of Ireland,955995,45.30148629
+2022,Female,Separated,Northern Ireland,32480,4.117025956
+2022,Female,Separated,Republic of Ireland,67070,3.178228636
+2022,Female,Single,Northern Ireland,285938,36.24427856
+2022,Female,Single,Republic of Ireland,853567,40.4477573
+2022,Female,Widowed,Northern Ireland,70991,8.99851569
+2022,Female,Widowed,Republic of Ireland,155166,7.352810863
+2022,Male,Divorced,Northern Ireland,37652,5.026687422
+2022,Male,Divorced,Republic of Ireland,54923,2.710163099
+2022,Male,Married,Northern Ireland,347218,46.35494405
+2022,Male,Married,Republic of Ireland,956855,47.21579507
+2022,Male,Separated,Northern Ireland,24792,3.309827753
+2022,Male,Separated,Republic of Ireland,52382,2.584778025
+2022,Male,Single,Northern Ireland,313987,41.9184772
+2022,Male,Single,Republic of Ireland,907480,44.77939678
+2022,Male,Widowed,Northern Ireland,25393,3.390063575
+2022,Male,Widowed,Republic of Ireland,54917,2.709867031

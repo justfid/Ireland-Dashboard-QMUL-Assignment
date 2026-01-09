@@ -70,9 +70,9 @@ with st.sidebar:
         ["Percentages", "Absolute numbers"],
         horizontal=True,
         key="housing_display_mode",
-        help="applies to composition charts below (type/occupancy). tenure is not affected.",
+        help="Controls display format for composition charts (housing type/occupancy, household composition, education, general health). Tenure and general health by age sections always show their default formats.",
     )
-    st.caption("Note: tenure is not affected by the display mode toggle.")
+    st.caption("Note: Tenure and general health by age are not affected by the display mode toggle.")
 
 
 st.header("Housing")
@@ -539,7 +539,7 @@ else:
             )
             fig_edu.update_traces(texttemplate=text_tmpl, textposition="outside")
             fig_edu.update_layout(
-                height=520,
+                height=600,
                 margin=dict(l=20, r=20, t=60, b=100),
                 legend_title_text="",
             )

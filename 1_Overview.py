@@ -2,7 +2,7 @@ import streamlit as st
 from streamlit.components.v1 import html
 import pandas as pd
 from utils.generate_maps import render_ireland_map
-from utils.common import ROI, NI, ALL
+from utils.common import ROI, NI
 from typing import Tuple
 
 #constants / data
@@ -154,9 +154,9 @@ def render_header() -> None:
     st.subheader("One island, two jurisdictions")
 
     st.write(
-        "This dashboard is a comparative investigation of the island of Ireland, using official statistics and "
-        "API-derived indicators to examine key social, economic, demographic, and environmental challenges. "
-        "It is designed to support exploration of differences, similarities, and trends over time."
+        "This dashboard provides a comparative analysis of the island of Ireland using official census statistics "
+        "to examine demographics, economic indicators, social conditions, and cultural identity. "
+        "It is designed to support exploration of differences, similarities, and trends across jurisdictions."
     )
 
     st.caption(

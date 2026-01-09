@@ -8,7 +8,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from utils.common import ensure_cols, ROI, NI, ALL, ALL_REGIONS
+from utils.common import ensure_cols, ALL_REGIONS
 
 pyramid_year = 2022
 
@@ -326,5 +326,5 @@ with col_right:
     st.caption(
         "All-Island dependency ratio values are population-weighted estimates derived from ROI and NI "
         "(not exact pooled ratios). "
-        "CPNI04 includes an early observation labelled '1936/1937', recorded here as 1936 for consistency."
+        "The dataset includes an early observation labelled '1936/1937', recorded here as 1936 for consistency."
     )

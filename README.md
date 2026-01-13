@@ -4,6 +4,8 @@
 
 In 1921, following the Irish War of Independence, the island of Ireland was split into two: the Republic of Ireland (ROI), which would later develop into a sovereign state, and Northern Ireland (NI), a constituent nation of the UK. In the one hundred years since, different administrations and governance styles have created structural and societal divergence. Naturally, this has led to different methods of collecting data. In the Republic (ROI), the CSO (Central Statistics Office) manages this whereas in the North (NI), NISRA (Northern Ireland Statistics and Research Agency) does. The two agencies have different definitions, methodologies and styles for data collection, and therefore the resulting statistical frameworks are different.
 
+Academic research has shown that despite sharing an island, the Republic of Ireland and Northern Ireland have diverged structurally over time due to differences in governance, policy frameworks, and socio-economic organisation (Bergin and McGuinness, 2024). Official statistical agencies also acknowledge that cross-border comparison remains constrained by differences in census timing and national statistical definitions (CSO and NISRA, 2025).
+
 As a result, it is difficult to directly compare the two nations accurately. For example, they both classify data differently and have differing definitions for common metrics such as housing tenure at more detailed category levels. This partially stems from differences in housing policy frameworks and administrative responsibilities, causing tenure categories to be defined and reported differently. They also report said data differently, with censuses not always being conducted in the same reference year.
 
 ## 1.2 Purpose
@@ -218,7 +220,51 @@ However, the deployment is linked to a personal repository which is a one-to-one
 
 Within the repository, there is a requirements file that specifies all Python dependencies. As mentioned earlier, the cleaning scripts are deterministic, and the dashboard only reads from cleaned data. This setup allows the dashboard to be reproduced on another machine or updated with new data with minimal configuration. 
 
+# 4. Recommendation, Reflection and Conclusions
+
+## 4.1 Key Conclusions - What the Project Achieved
+
+The dashboard has successfully enabled cross-jurisdictional comparisons between ROI and NI. Given that harmonised census data has been used so heavily, comparisons are methodologically valid and any differences shown are structural, rather than being a result of poor data handling. The use of interactive visualisations allowed users to dynamically explore indicators and appropriately compare scale and composition. Even though the dashboard is a useful interpretive tool, it should not be used for predictive modelling.
+
+## 4.2 Reflection on Technical and Analytical Decisions
+
+Using census data was a deliberate choice as it is stable and well-documented whilst having near full population coverage. There are flaws with it too such as having misaligned years but all-in-all the data is still reliable. Some indicators are not available across all jurisdictions or years, but instead of filling the gaps, the dashboard prioritises transparency. As a result, the decision was made to not interpolate, estimate or reweight data to keep data as close to the original sources as possible. This all was done to avoid misleading conclusions and to ensure a valid, fair comparison.
+
+## 4.3 Knowledge, Skills, and Behaviours
+
+How I have shown each KSB:
+
+### **Knowledge**
+K5: I have shown this by selecting and using appropriate development tools, including Python for data processing, Streamlit for dashboard development, and Folium for geographic visualisation.
+K6: I have shown this through separating data ingestion, cleaning, validation, analysis, and deployment into distinct steps, aligned with professional development practices.
+K12: I have shown this by managing datasets through a structured pipeline, maintaining a clear separation between raw and cleaned data, and enforcing a single source of truth for analysis.
+K13: I have shown this by using descriptive statistics suited to census data and avoiding inferential techniques where they would be inappropriate.
+K17: I have shown this by abstracting complex data into concise, accessible visualisations and written explanations tailored to the intended audience.
 
 
+### **Skills**
+S10: I have shown this by designing, implementing, and debugging a data-driven project, from data preparation through to a deployed, interactive dashboard.
+S13: I have shown this by making the dashboard clear and understandable to all audiences, and documenting the sources for academic and technical audiences. 
+S15: I have shown this by ensuring all of my data was ethically obtained, avoiding misrepresentation of data, documenting limitations, and ensuring privacy by only using anonymised statistics. 
 
+### **Behaviours**
+B3: I have shown the integrity associated with this KSB by prioritising transparency over completeness, avoiding artificial harmonisation, misleading adjustments, and ensuring ethical handling of data.
+B5: I have shown this by ensuring the dashboard is intuitive, neutral, and accessible for both technical and non-technical audiences. 
 
+Overall, this project has significantly developed my understanding of the KSBs attached to the DTSP apprenticeship. This program evidences this through the responsible design, implementation, and documentation of a data-driven project.
+
+## 4.4 Limitations and Future Improvements
+
+### **Limitations**
+
+The dashboard primarily relies on census data which is published infrequently. As a result, it cannot capture short-term changes. Census reference years also differ across jurisdictions (e.g. 2021 for NI and 2022 for ROI), limiting precise temporal alignment. Some indicators were excluded from the dashboard as there were major differences in definitions or reporting frameworks across jurisdictions. Finally, the analysis is intentionally kept descriptive and does not support forecasting or predictive modelling.
+
+### **Future Improvements**
+
+The dashboard can be updated when new census data is released (e.g. 2031), using the existing cleaning scripts. Coverage could be extended if additional harmonised cross-border indicators are released by official statistical bodies. Usability and accessibility could be improved, for example through clearer tooltips and an improved layout on mobile devices. Finally, additional contextual explanations could be added to further support non-technical users.
+
+# 5. Citations
+
+Bergin, A. and McGuinness, S. (2024) Assessing economic trends in Ireland and Northern Ireland. Dublin: Economic and Social Research Institute (ESRI).
+
+Central Statistics Office (CSO) and Northern Ireland Statistics and Research Agency (NISRA) (2025) Ireland and Northern Ireland: A Joint Census Publication 2021–2022. Dublin/Belfast: CSO and NISRA.

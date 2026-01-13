@@ -204,11 +204,15 @@ Within the dashboard users can switch between regions (ROI, NI, and All-Island w
 
 Interactivity is deliberately restricted to valid comparisons only. As a result, users cannot select incompatible regions, and unavailable settings are excluded by design. This maintains flexibility while preventing misleading analysis.
 
-## 3.4 Version Control and Deployment
+## 3.4 Version Control, Testing, and Deployment
 
 ### **Version Control**
 
 The project was managed using Git for version control. A remote GitHub repository was used to track changes, and allow development from multiple devices (a laptop and a desktop computer). Commits were made iteratively as new features, pages or tweaks were added. Using version control allowed changes to be tracked and reverted if necessary. This aligns with professional software development practises.
+
+### **Testing and Validation**
+
+Basic unit tests were implemented to validate deterministic components of the system. The tests focus on data cleaning logic and shared helper functions, including schema validation, expected transformations, and consistent handling of invalid inputs. Testing prioritises data integrity and reproducibility over statistical validation, given the use of official census data. The testing scripts are stored separately from the dashboard code and can be run independently of the dashboard.
 
 ### **Deployment**
 

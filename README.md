@@ -265,6 +265,6 @@ The dashboard can be updated when new census data is released (e.g. 2031), using
 
 # 5. Citations
 
-Bergin, A. and McGuinness, S. (2024) Assessing economic trends in Ireland and Northern Ireland. Dublin: Economic and Social Research Institute (ESRI).
+Bergin, A. and McGuinness, S. (2024) *Assessing economic trends in Ireland and Northern Ireland*. Dublin: Economic and Social Research Institute (ESRI).
 
-Central Statistics Office (CSO) and Northern Ireland Statistics and Research Agency (NISRA) (2025) Ireland and Northern Ireland: A Joint Census Publication 2021–2022. Dublin/Belfast: CSO and NISRA.
+Central Statistics Office (CSO) and Northern Ireland Statistics and Research Agency (NISRA) (2025) *Ireland and Northern Ireland: A Joint Census Publication 2021–2022*. Dublin/Belfast: CSO and NISRA.

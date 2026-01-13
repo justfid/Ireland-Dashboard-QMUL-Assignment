@@ -61,6 +61,7 @@ with st.sidebar:
         horizontal=True,
         key="cultural_display_mode",
     )
+    st.caption("Note: This setting affects Religion, Ethnicity, Languages, and Migration sections only. Marriage always displays percentages.")
 
 
 #religion
@@ -547,7 +548,7 @@ else:
             if not mar_roi.empty:
                 fig_roi = px.pie(
                     mar_roi,
-                    values=metric_col,
+                    values="Percentage",
                     names="Status",
                     title=f"{ROI}",
                     category_orders={"Status": existing_statuses},
@@ -565,7 +566,7 @@ else:
             if not mar_ni.empty:
                 fig_ni = px.pie(
                     mar_ni,
-                    values=metric_col,
+                    values="Percentage",
                     names="Status",
                     title=f"{NI}",
                     category_orders={"Status": existing_statuses},

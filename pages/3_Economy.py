@@ -132,7 +132,7 @@ with st.sidebar:
         horizontal=True,
         key="labour_display_mode",
     )
-    st.caption("Note: This setting does not affect the unemployment rate graph.")
+    st.caption("Note: This setting only affects the Labour Market Summary and Employment Structure sections. It does not affect unemployment rate, transport mode, or cross-border commuting graphs.")
 
 #labour market
 st.header("Labour market")

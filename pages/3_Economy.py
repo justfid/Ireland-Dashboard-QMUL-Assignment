@@ -320,7 +320,7 @@ if COMMUTE_PATH.exists():
     )
     fig_commute.update_traces(texttemplate=text_tmpl, textposition="outside")
     fig_commute.update_layout(
-        height=500,
+        height=600,
         margin=dict(l=20, r=20, t=50, b=40),
         legend_title_text="",
         yaxis_title=value_label,
